@@ -1,5 +1,6 @@
 import streamlit as st
 import json
+import base64
 from pathlib import Path
 
 # ── Page config ───────────────────────────────────────────────────────────────
@@ -15,7 +16,7 @@ st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 [data-testid="stAppViewContainer"] {
-    background: #f4f2ff;
+    background: #0d0b2e;
 }
 [data-testid="stHeader"], [data-testid="stToolbar"] { display: none !important; }
 footer, #MainMenu { display: none !important; }
@@ -70,15 +71,25 @@ _RACE_HTML = r"""<!DOCTYPE html>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif;
-  background: transparent;
+  background: #0d0b2e;
   padding: 2px 2px 6px;
   -webkit-font-smoothing: antialiased;
+  color: #e2e0f8;
 }
+
+/* ── Logo bar ── */
+.logo-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.logo-bar img { display: block; }
 
 /* ── Spec bar ── */
 .spec-bar {
-  background: white;
-  border: 1px solid #e6e2ff;
+  background: #161438;
+  border: 1px solid rgba(124,115,255,0.2);
   border-radius: 10px;
   padding: 10px 20px;
   display: flex;
@@ -86,15 +97,14 @@ body {
   gap: 6px;
   margin-bottom: 12px;
   font-size: 0.81rem;
-  box-shadow: 0 1px 8px rgba(124,115,255,0.06);
   flex-wrap: wrap;
 }
-.spec-lbl { color: #bbb; margin-right: 2px; }
-.spec-sep { color: #dcd8f5; margin: 0 10px; font-size: 1rem; }
+.spec-lbl { color: #5a567a; margin-right: 2px; }
+.spec-sep { color: #2e2a52; margin: 0 10px; font-size: 1rem; }
 .sb-sel {
   border: none;
   background: transparent;
-  color: #040442;
+  color: #c8c4f0;
   font-weight: 700;
   font-size: 0.81rem;
   font-family: inherit;
@@ -109,6 +119,7 @@ body {
   background-size: 10px 6px;
 }
 .sb-sel:hover { color: #7C73FF; }
+.sb-sel option { background: #1e1b48; color: #c8c4f0; }
 
 /* ── Selector row ── */
 .sel-row {
@@ -121,18 +132,19 @@ body {
 .sel-wrap select {
   width: 100%;
   padding: 9px 36px 9px 14px;
-  border: 1.5px solid #e6e2ff;
+  border: 1px solid rgba(124,115,255,0.25);
   border-radius: 8px;
   font-size: 0.875rem;
   font-weight: 500;
-  color: #040442;
-  background: white;
+  color: #c8c4f0;
+  background: #161438;
   cursor: pointer;
   outline: none;
   -webkit-appearance: none;
   appearance: none;
 }
 .sel-wrap select:focus { border-color: #7C73FF; }
+.sel-wrap select option { background: #1e1b48; }
 .sel-wrap::after {
   content: '';
   position: absolute;
@@ -147,16 +159,18 @@ body {
 
 /* ── Prompt preview ── */
 .prompt-box {
-  background: white;
-  border: 1px solid #e6e2ff;
+  background: #161438;
+  border: 1px solid rgba(124,115,255,0.2);
   border-left: 3px solid #7C73FF;
   border-radius: 8px;
   padding: 9px 14px;
   font-size: 0.81rem;
-  color: #444;
+  color: #8480b0;
   line-height: 1.55;
   margin-bottom: 14px;
 }
+
+/* ── Run button ── */
 .run-btn {
   background: #7C73FF;
   color: white;
@@ -175,7 +189,7 @@ body {
   gap: 6px;
 }
 .run-btn:hover:not(:disabled) { background: #6a60f5; }
-.run-btn:disabled { background: #b0abf0; cursor: default; }
+.run-btn:disabled { background: #2e2a6a; color: #6060a0; cursor: default; }
 
 /* ── Response cards ── */
 .cards-row {
@@ -185,15 +199,18 @@ body {
   margin-bottom: 14px;
 }
 .card {
-  background: white;
-  border: 1px solid #e6e2ff;
+  background: #161438;
+  border: 1px solid rgba(124,115,255,0.2);
   border-radius: 12px;
   padding: 16px 18px;
   min-height: 195px;
   display: flex;
   flex-direction: column;
 }
-.card-opt { background: #f5fffb; border-color: #b8edcf; }
+.card-opt {
+  background: #0e1e1a;
+  border-color: rgba(26,213,152,0.25);
+}
 .card-hdr {
   display: flex;
   align-items: center;
@@ -201,29 +218,30 @@ body {
   margin-bottom: 10px;
   flex-shrink: 0;
 }
-.card-title { font-size: .875rem; font-weight: 700; color: #040442; }
+.card-title { font-size: .875rem; font-weight: 700; color: #c8c4f0; }
 .badge {
   font-size: .62rem; font-weight: 800; padding: 2px 10px;
-  border-radius: 20px; background: #eeeeff; color: #7C73FF;
+  border-radius: 20px; background: rgba(124,115,255,0.18); color: #7C73FF;
   letter-spacing: .3px;
 }
-.badge-opt { background: #c8f0de; color: #0a8f60; }
-.card-time { margin-left: auto; font-size: 1.05rem; font-weight: 800; color: #040442; letter-spacing: -.5px; }
+.badge-opt { background: rgba(26,213,152,0.15); color: #1AD598; }
+.card-time { margin-left: auto; font-size: 1.05rem; font-weight: 800; color: #c8c4f0; letter-spacing: -.5px; }
 .card-time-opt { color: #1AD598; }
 .card-body {
-  font-size: .8rem; color: #333; line-height: 1.65;
+  font-size: .8rem; color: #9490c0; line-height: 1.65;
   flex: 1; white-space: pre-wrap; word-break: break-word;
   min-height: 72px;
 }
-.placeholder { color: #ccc; font-style: italic; }
+.card-body strong { color: #c8c4f0; }
+.placeholder { color: #3a3660; font-style: italic; }
 .card-footer {
   display: flex; justify-content: space-between;
-  font-size: .73rem; color: #aaa;
+  font-size: .73rem; color: #4a4670;
   margin-top: 10px; padding-top: 8px;
-  border-top: 1px solid #f0eeff; flex-shrink: 0;
+  border-top: 1px solid rgba(124,115,255,0.12); flex-shrink: 0;
 }
-.card-footer-opt { border-color: #d8f2e8; }
-.card-footer strong { color: #040442; }
+.card-footer-opt { border-color: rgba(26,213,152,0.12); }
+.card-footer strong { color: #c8c4f0; }
 .cur { display: inline-block; width: 2px; height: 12px; background: #7C73FF; margin-left: 1px; vertical-align: middle; animation: bl .7s infinite; }
 .cur-opt { background: #1AD598; }
 @keyframes bl { 0%,100%{opacity:1} 50%{opacity:0} }
@@ -236,25 +254,31 @@ body {
   transition: opacity .4s;
 }
 .metrics-row.show { opacity: 1; }
-.mc { background: white; border: 1px solid #e6e2ff; border-radius: 12px; padding: 16px 20px; }
+.mc {
+  background: #161438;
+  border: 1px solid rgba(124,115,255,0.2);
+  border-radius: 12px; padding: 16px 20px;
+}
 .mc-lbl {
   font-size: .59rem; font-weight: 800; letter-spacing: 1.4px;
-  text-transform: uppercase; color: #bbb; margin-bottom: 10px;
+  text-transform: uppercase; color: #4a4670; margin-bottom: 10px;
 }
 .mc-pct {
   display: block; font-size: 2.2rem; font-weight: 900;
   color: #1AD598; line-height: 1; margin-bottom: 8px; letter-spacing: -1px;
 }
 .mc-arrow-row {
-  font-size: .78rem; color: #aaa; display: flex; align-items: center; gap: 5px;
+  font-size: .78rem; color: #5a567a; display: flex; align-items: center; gap: 5px;
 }
 .mc-arrow-row .mc-old-v { text-decoration: line-through; }
-.mc-arrow-row .mc-arr   { color: #ccc; }
-.mc-arrow-row .mc-new-v { color: #040442; font-weight: 700; }
+.mc-arrow-row .mc-arr   { color: #3a3660; }
+.mc-arrow-row .mc-new-v { color: #c8c4f0; font-weight: 700; }
 
 /* ── Callout ── */
 .callout {
-  background: white; border: 1.5px solid #1AD598; border-radius: 12px;
+  background: #0e1e1a;
+  border: 1.5px solid rgba(26,213,152,0.35);
+  border-radius: 12px;
   padding: 16px 28px; text-align: center;
   opacity: 0;
   transition: opacity .4s .15s;
@@ -264,19 +288,27 @@ body {
   display: flex; gap: 10px; justify-content: center; margin-bottom: 12px; flex-wrap: wrap;
 }
 .co-pill {
-  background: #e8faf3; color: #0a8f60; border-radius: 20px;
+  background: rgba(26,213,152,0.12);
+  color: #1AD598;
+  border-radius: 20px;
   padding: 4px 14px; font-size: .75rem; font-weight: 600;
 }
 .co-headline {
-  font-size: 1.1rem; font-weight: 800; color: #040442; line-height: 1.3;
+  font-size: 1.1rem; font-weight: 800; color: #e2e0f8; line-height: 1.3;
   margin-bottom: 8px;
 }
 .co-note {
-  font-size: .7rem; color: #bbb; line-height: 1.5;
+  font-size: .7rem; color: #4a4670; line-height: 1.5;
 }
 </style>
 </head>
 <body>
+
+<!-- Logo bar -->
+<div class="logo-bar">
+  <img src="__TURINTECH_LOGO__" height="28" alt="TurinTech">
+  <img src="__ARTEMIS_LOGO__" height="28" alt="Artemis">
+</div>
 
 <!-- Spec bar with inline cascade selects -->
 <div class="spec-bar">
@@ -586,8 +618,21 @@ function renderText(s) {
 
 
 def render_race(all_data: list):
-    html = _RACE_HTML.replace("__CONFIGS_JSON__", json.dumps(all_data))
-    st.components.v1.html(html, height=640, scrolling=False)
+    logos_dir = Path(__file__).parent / "logos"
+
+    tt_svg = (logos_dir / "TurinTech-light-no Background.svg").read_bytes()
+    tt_src = "data:image/svg+xml;base64," + base64.b64encode(tt_svg).decode()
+
+    artemis_png = (logos_dir / "artemis-logo-wordmark.png").read_bytes()
+    artemis_src = "data:image/png;base64," + base64.b64encode(artemis_png).decode()
+
+    html = (
+        _RACE_HTML
+        .replace("__CONFIGS_JSON__", json.dumps(all_data))
+        .replace("__TURINTECH_LOGO__", tt_src)
+        .replace("__ARTEMIS_LOGO__", artemis_src)
+    )
+    st.components.v1.html(html, height=670, scrolling=False)
 
 
 # ── Main ──────────────────────────────────────────────────────────────────────
