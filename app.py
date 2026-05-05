@@ -14,9 +14,8 @@ st.set_page_config(
 # ── Minimal shell CSS ─────────────────────────────────────────────────────────
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 [data-testid="stAppViewContainer"] {
-    background: #0d0b2e;
+    background: #020617;
 }
 [data-testid="stHeader"], [data-testid="stToolbar"] { display: none !important; }
 footer, #MainMenu { display: none !important; }
@@ -24,9 +23,7 @@ footer, #MainMenu { display: none !important; }
     padding: 1.5rem 2.5rem 2rem !important;
     max-width: 1060px !important;
     margin: 0 auto !important;
-    font-family: 'Inter', -apple-system, sans-serif;
 }
-/* hide streamlit iframe border */
 [data-testid="stCustomComponentV1"] iframe {
     border: none !important;
 }
@@ -35,6 +32,7 @@ footer, #MainMenu { display: none !important; }
 
 # ── Data ──────────────────────────────────────────────────────────────────────
 DATA_DIR = Path(__file__).parent / "data"
+_DESIGN_FONTS = Path("/Users/nedazarei/Documents/turintech/artemis design system/fonts")
 
 
 def list_configs():
@@ -67,14 +65,73 @@ def load_config(config_id: str):
 _RACE_HTML = r"""<!DOCTYPE html>
 <html><head>
 <meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,75..125,100..900;1,75..125,100..900&display=swap" rel="stylesheet">
 <style>
+/* Hack — embedded for offline use */
+@font-face {
+  font-family: 'Hack';
+  src: url('__HACK_REGULAR__') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Hack';
+  src: url('__HACK_BOLD__') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ── Artemis design tokens (inline subset) ── */
+:root {
+  --font-sans: 'Archivo', system-ui, -apple-system, Segoe UI, sans-serif;
+  --font-mono: 'Hack', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Brand 1 — violet-indigo */
+  --color-brand-400: #7b66ff;
+  --color-brand-500: #6350dc;
+
+  /* Slate neutrals */
+  --color-slate-50:  #f8fafc;
+  --color-slate-100: #f1f5f9;
+  --color-slate-200: #e2e8f0;
+  --color-slate-300: #cbd5e1;
+  --color-slate-400: #94a3b8;
+  --color-slate-500: #64748b;
+  --color-slate-600: #475569;
+  --color-slate-700: #334155;
+  --color-slate-800: #1e293b;
+  --color-slate-900: #0f172a;
+  --color-slate-950: #020617;
+
+  /* Semantic dark */
+  --color-background: var(--color-slate-950);
+  --color-card:       var(--color-slate-900);
+  --color-border:     rgba(255,255,255,0.1);
+  --color-primary:    var(--color-brand-400);
+
+  /* Status */
+  --color-success:    #4ade80;
+  --color-success-fg: #f0fdf4;
+
+  /* Radii */
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
+  --radius-full: 9999px;
+}
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif;
-  background: #0d0b2e;
+  font-family: var(--font-sans);
+  background: var(--color-background);
   padding: 2px 2px 6px;
   -webkit-font-smoothing: antialiased;
-  color: #e2e0f8;
+  color: var(--color-slate-100);
 }
 
 /* ── Logo bar ── */
@@ -88,9 +145,9 @@ body {
 
 /* ── Spec bar ── */
 .spec-bar {
-  background: #161438;
-  border: 1px solid rgba(124,115,255,0.2);
-  border-radius: 10px;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
   padding: 10px 20px;
   display: flex;
   align-items: center;
@@ -99,27 +156,27 @@ body {
   font-size: 0.81rem;
   flex-wrap: wrap;
 }
-.spec-lbl { color: #5a567a; margin-right: 2px; }
-.spec-sep { color: #2e2a52; margin: 0 10px; font-size: 1rem; }
+.spec-lbl { color: var(--color-slate-500); margin-right: 2px; }
+.spec-sep { color: var(--color-slate-700); margin: 0 10px; font-size: 1rem; }
 .sb-sel {
   border: none;
   background: transparent;
-  color: #c8c4f0;
+  color: var(--color-slate-200);
   font-weight: 700;
   font-size: 0.81rem;
-  font-family: inherit;
+  font-family: var(--font-sans);
   cursor: pointer;
   outline: none;
   padding: 0 18px 0 0;
   -webkit-appearance: none;
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%237C73FF' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%237b66ff' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 2px center;
   background-size: 10px 6px;
 }
-.sb-sel:hover { color: #7C73FF; }
-.sb-sel option { background: #1e1b48; color: #c8c4f0; }
+.sb-sel:hover { color: var(--color-primary); }
+.sb-sel option { background: var(--color-card); color: var(--color-slate-200); }
 
 /* ── Selector row ── */
 .sel-row {
@@ -132,19 +189,20 @@ body {
 .sel-wrap select {
   width: 100%;
   padding: 9px 36px 9px 14px;
-  border: 1px solid rgba(124,115,255,0.25);
-  border-radius: 8px;
+  border: 1px solid rgba(123, 102, 255, 0.3);
+  border-radius: var(--radius-md);
   font-size: 0.875rem;
   font-weight: 500;
-  color: #c8c4f0;
-  background: #161438;
+  font-family: var(--font-sans);
+  color: var(--color-slate-200);
+  background: var(--color-card);
   cursor: pointer;
   outline: none;
   -webkit-appearance: none;
   appearance: none;
 }
-.sel-wrap select:focus { border-color: #7C73FF; }
-.sel-wrap select option { background: #1e1b48; }
+.sel-wrap select:focus { border-color: var(--color-primary); }
+.sel-wrap select option { background: var(--color-card); }
 .sel-wrap::after {
   content: '';
   position: absolute;
@@ -153,32 +211,33 @@ body {
   transform: translateY(-50%);
   border-left: 4px solid transparent;
   border-right: 4px solid transparent;
-  border-top: 5px solid #7C73FF;
+  border-top: 5px solid var(--color-primary);
   pointer-events: none;
 }
 
 /* ── Prompt preview ── */
 .prompt-box {
-  background: #161438;
-  border: 1px solid rgba(124,115,255,0.2);
-  border-left: 3px solid #7C73FF;
-  border-radius: 8px;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-primary);
+  border-radius: var(--radius-md);
   padding: 9px 14px;
   font-size: 0.81rem;
-  color: #8480b0;
+  color: var(--color-slate-400);
   line-height: 1.55;
   margin-bottom: 14px;
 }
 
 /* ── Run button ── */
 .run-btn {
-  background: #7C73FF;
-  color: white;
+  background: var(--color-primary);
+  color: var(--color-slate-50);
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   padding: 9px 22px;
   font-size: 0.875rem;
   font-weight: 700;
+  font-family: var(--font-sans);
   cursor: pointer;
   white-space: nowrap;
   transition: background .15s;
@@ -188,8 +247,8 @@ body {
   align-items: center;
   gap: 6px;
 }
-.run-btn:hover:not(:disabled) { background: #6a60f5; }
-.run-btn:disabled { background: #2e2a6a; color: #6060a0; cursor: default; }
+.run-btn:hover:not(:disabled) { background: var(--color-brand-500); }
+.run-btn:disabled { background: var(--color-slate-800); color: var(--color-slate-600); cursor: default; }
 
 /* ── Response cards ── */
 .cards-row {
@@ -199,17 +258,17 @@ body {
   margin-bottom: 14px;
 }
 .card {
-  background: #161438;
-  border: 1px solid rgba(124,115,255,0.2);
-  border-radius: 12px;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
   padding: 16px 18px;
   min-height: 195px;
   display: flex;
   flex-direction: column;
 }
 .card-opt {
-  background: #0e1e1a;
-  border-color: rgba(26,213,152,0.25);
+  background: #0b1a11;
+  border-color: rgba(74, 222, 128, 0.25);
 }
 .card-hdr {
   display: flex;
@@ -218,87 +277,147 @@ body {
   margin-bottom: 10px;
   flex-shrink: 0;
 }
-.card-title { font-size: .875rem; font-weight: 700; color: #c8c4f0; }
+.card-title {
+  font-size: .875rem;
+  font-weight: 700;
+  color: var(--color-slate-200);
+}
 .badge {
   font-size: .62rem; font-weight: 800; padding: 2px 10px;
-  border-radius: 20px; background: rgba(124,115,255,0.18); color: #7C73FF;
+  border-radius: var(--radius-full);
+  background: rgba(123, 102, 255, 0.18);
+  color: var(--color-primary);
   letter-spacing: .3px;
 }
-.badge-opt { background: rgba(26,213,152,0.15); color: #1AD598; }
-.card-time { margin-left: auto; font-size: 1.05rem; font-weight: 800; color: #c8c4f0; letter-spacing: -.5px; }
-.card-time-opt { color: #1AD598; }
+.badge-opt {
+  background: rgba(74, 222, 128, 0.15);
+  color: var(--color-success);
+}
+.card-time {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color-slate-200);
+  letter-spacing: -.5px;
+}
+.card-time-opt { color: var(--color-success); }
 .card-body {
-  font-size: .8rem; color: #9490c0; line-height: 1.65;
-  flex: 1; white-space: pre-wrap; word-break: break-word;
+  font-size: .8rem;
+  color: var(--color-slate-400);
+  line-height: 1.65;
+  flex: 1;
+  white-space: pre-wrap;
+  word-break: break-word;
   min-height: 72px;
 }
-.card-body strong { color: #c8c4f0; }
-.placeholder { color: #3a3660; font-style: italic; }
+.card-body strong { color: var(--color-slate-200); }
+.placeholder { color: var(--color-slate-700); font-style: italic; }
 .card-footer {
-  display: flex; justify-content: space-between;
-  font-size: .73rem; color: #4a4670;
-  margin-top: 10px; padding-top: 8px;
-  border-top: 1px solid rgba(124,115,255,0.12); flex-shrink: 0;
+  display: flex;
+  justify-content: space-between;
+  font-size: .73rem;
+  font-family: var(--font-mono);
+  color: var(--color-slate-600);
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--color-border);
+  flex-shrink: 0;
 }
-.card-footer-opt { border-color: rgba(26,213,152,0.12); }
-.card-footer strong { color: #c8c4f0; }
-.cur { display: inline-block; width: 2px; height: 12px; background: #7C73FF; margin-left: 1px; vertical-align: middle; animation: bl .7s infinite; }
-.cur-opt { background: #1AD598; }
+.card-footer-opt { border-color: rgba(74, 222, 128, 0.15); }
+.card-footer strong { color: var(--color-slate-300); }
+.cur {
+  display: inline-block; width: 2px; height: 12px;
+  background: var(--color-primary);
+  margin-left: 1px; vertical-align: middle;
+  animation: bl .7s infinite;
+}
+.cur-opt { background: var(--color-success); }
 @keyframes bl { 0%,100%{opacity:1} 50%{opacity:0} }
 
 /* ── Metrics ── */
 .metrics-row {
-  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
   margin-bottom: 12px;
   opacity: 0;
   transition: opacity .4s;
 }
 .metrics-row.show { opacity: 1; }
 .mc {
-  background: #161438;
-  border: 1px solid rgba(124,115,255,0.2);
-  border-radius: 12px; padding: 16px 20px;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: 16px 20px;
 }
 .mc-lbl {
-  font-size: .59rem; font-weight: 800; letter-spacing: 1.4px;
-  text-transform: uppercase; color: #4a4670; margin-bottom: 10px;
+  font-size: .59rem;
+  font-weight: 800;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--color-slate-600);
+  margin-bottom: 10px;
 }
 .mc-pct {
-  display: block; font-size: 2.2rem; font-weight: 900;
-  color: #1AD598; line-height: 1; margin-bottom: 8px; letter-spacing: -1px;
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--color-success);
+  line-height: 1;
+  margin-bottom: 8px;
+  letter-spacing: -1px;
 }
 .mc-arrow-row {
-  font-size: .78rem; color: #5a567a; display: flex; align-items: center; gap: 5px;
+  font-size: .78rem;
+  font-family: var(--font-mono);
+  color: var(--color-slate-600);
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 .mc-arrow-row .mc-old-v { text-decoration: line-through; }
-.mc-arrow-row .mc-arr   { color: #3a3660; }
-.mc-arrow-row .mc-new-v { color: #c8c4f0; font-weight: 700; }
+.mc-arrow-row .mc-arr   { color: var(--color-slate-700); }
+.mc-arrow-row .mc-new-v { color: var(--color-slate-200); font-weight: 700; }
 
 /* ── Callout ── */
 .callout {
-  background: #0e1e1a;
-  border: 1.5px solid rgba(26,213,152,0.35);
-  border-radius: 12px;
-  padding: 16px 28px; text-align: center;
+  background: #0b1a11;
+  border: 1.5px solid rgba(74, 222, 128, 0.35);
+  border-radius: var(--radius-xl);
+  padding: 16px 28px;
+  text-align: center;
   opacity: 0;
   transition: opacity .4s .15s;
 }
 .callout.show { opacity: 1; }
 .co-pills {
-  display: flex; gap: 10px; justify-content: center; margin-bottom: 12px; flex-wrap: wrap;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
 }
 .co-pill {
-  background: rgba(26,213,152,0.12);
-  color: #1AD598;
-  border-radius: 20px;
-  padding: 4px 14px; font-size: .75rem; font-weight: 600;
+  background: rgba(74, 222, 128, 0.12);
+  color: var(--color-success);
+  border-radius: var(--radius-full);
+  padding: 4px 14px;
+  font-size: .75rem;
+  font-weight: 600;
 }
 .co-headline {
-  font-size: 1.1rem; font-weight: 800; color: #e2e0f8; line-height: 1.3;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--color-slate-100);
+  line-height: 1.3;
   margin-bottom: 8px;
 }
 .co-note {
-  font-size: .7rem; color: #4a4670; line-height: 1.5;
+  font-size: .7rem;
+  color: var(--color-slate-600);
+  line-height: 1.5;
 }
 </style>
 </head>
@@ -341,10 +460,10 @@ body {
       <span class="badge" id="done-b" style="display:none">Done</span>
       <span class="card-time" id="time-b"></span>
     </div>
-    <div class="card-body" id="text-b"><span class="placeholder">Select a prompt and click Run race</span></div>
+    <div class="card-body" id="text-b"><span class="placeholder">Select a prompt and click Compare</span></div>
     <div class="card-footer" id="foot-b" style="display:none">
       <span>TTFT <strong id="ttft-b">—</strong></span>
-      <span>tok/s <strong id="tps-b">—</strong> tok/s</span>
+      <span>tok/s <strong id="tps-b">—</strong></span>
     </div>
   </div>
   <div class="card card-opt">
@@ -353,10 +472,10 @@ body {
       <span class="badge badge-opt" id="done-a" style="display:none">Done</span>
       <span class="card-time card-time-opt" id="time-a"></span>
     </div>
-    <div class="card-body" id="text-a"><span class="placeholder">Select a prompt and click Run race</span></div>
+    <div class="card-body" id="text-a"><span class="placeholder">Select a prompt and click Compare</span></div>
     <div class="card-footer card-footer-opt" id="foot-a" style="display:none">
       <span>TTFT <strong id="ttft-a">—</strong></span>
-      <span>tok/s <strong id="tps-a">—</strong> tok/s</span>
+      <span>tok/s <strong id="tps-a">—</strong></span>
     </div>
   </div>
 </div>
@@ -626,11 +745,23 @@ def render_race(all_data: list):
     artemis_png = (logos_dir / "artemis-logo-wordmark.png").read_bytes()
     artemis_src = "data:image/png;base64," + base64.b64encode(artemis_png).decode()
 
+    hack_regular_src = ""
+    hack_bold_src = ""
+    if _DESIGN_FONTS.exists():
+        hack_r = _DESIGN_FONTS / "Hack-Regular.ttf"
+        hack_b = _DESIGN_FONTS / "Hack-Bold.ttf"
+        if hack_r.exists():
+            hack_regular_src = "data:font/ttf;base64," + base64.b64encode(hack_r.read_bytes()).decode()
+        if hack_b.exists():
+            hack_bold_src = "data:font/ttf;base64," + base64.b64encode(hack_b.read_bytes()).decode()
+
     html = (
         _RACE_HTML
         .replace("__CONFIGS_JSON__", json.dumps(all_data))
         .replace("__TURINTECH_LOGO__", tt_src)
         .replace("__ARTEMIS_LOGO__", artemis_src)
+        .replace("__HACK_REGULAR__", hack_regular_src)
+        .replace("__HACK_BOLD__", hack_bold_src)
     )
     st.components.v1.html(html, height=670, scrolling=False)
 
