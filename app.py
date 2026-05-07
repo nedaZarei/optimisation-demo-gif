@@ -425,7 +425,6 @@ body {
 
 <!-- Logo bar -->
 <div class="logo-bar">
-  <img src="__TURINTECH_LOGO__" height="28" alt="TurinTech">
   <img src="__ARTEMIS_LOGO__" height="28" alt="Artemis">
 </div>
 
