@@ -467,7 +467,7 @@ body {
   </div>
   <div class="card card-opt">
     <div class="card-hdr">
-      <span class="card-title">&#9889; Artemis-optimised</span>
+      <span class="card-title">&#9889; Artemis-optimized</span>
       <span class="badge badge-opt" id="done-a" style="display:none">Done</span>
       <span class="card-time card-time-opt" id="time-a"></span>
     </div>
