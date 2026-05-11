@@ -380,6 +380,12 @@ body {
 .mc-arrow-row .mc-old-v { text-decoration: line-through; }
 .mc-arrow-row .mc-arr   { color: var(--color-slate-700); }
 .mc-arrow-row .mc-new-v { color: var(--color-slate-200); font-weight: 700; }
+.mc-note {
+  font-size: .72rem;
+  color: var(--color-slate-600);
+  line-height: 1.4;
+  margin-top: 2px;
+}
 
 /* ── Callout ── */
 .callout {
@@ -500,13 +506,9 @@ body {
     </div>
   </div>
   <div class="mc">
-    <div class="mc-lbl">Cost / 1M Tokens</div>
+    <div class="mc-lbl">Cost per Token</div>
     <span class="mc-pct" id="m-cost-pct"></span>
-    <div class="mc-arrow-row">
-      <span class="mc-old-v" id="m-cost-old"></span>
-      <span class="mc-arr">→</span>
-      <span class="mc-new-v" id="m-cost-new"></span>
-    </div>
+    <div class="mc-note" id="m-cost-note"></div>
   </div>
 </div>
 
@@ -640,7 +642,6 @@ function startRace() {
   var p    = ALL[curCfg].demo_prompts[curPrompt];
   var b    = p.recorded.baseline;
   var a    = p.recorded.optimized;
-  var cost = ALL[curCfg].correctness.accuracy.cost_per_1m;
 
   var bTxt  = strip(b.text || '');
   var aTxt  = strip(a.text || '');
@@ -687,18 +688,18 @@ function startRace() {
     }
 
     if (!bDone || !aDone) { raf = requestAnimationFrame(tick); }
-    else { finish(bTtft, aTtft, bTps, aTps, bEnd, aEnd, cost); }
+    else { finish(bTtft, aTtft, bTps, aTps, bEnd, aEnd); }
   }
   raf = requestAnimationFrame(tick);
 }
 
-function finish(bTtft,aTtft,bTps,aTps,bEnd,aEnd,cost) {
+function finish(bTtft,aTtft,bTps,aTps,bEnd,aEnd) {
   var btn = document.getElementById('run-btn');
   btn.disabled = false; btn.textContent = '↺ Compare again';
 
   var tpsGain  = Math.round((aTps - bTps)  / bTps  * 100);
   var ttftSave = Math.round((bTtft - aTtft) / bTtft * 100);
-  var costSave = Math.round((cost.baseline - cost.optimized) / cost.baseline * 100);
+  var costSave = Math.round((1 - bTps / aTps) * 100);
 
   setText('m-tps-pct',  '+' + tpsGain  + '%');
   setText('m-tps-old',  bTps.toFixed(1) + ' tok/s');
@@ -709,8 +710,7 @@ function finish(bTtft,aTtft,bTps,aTps,bEnd,aEnd,cost) {
   setText('m-ttft-new', aTtft + ' ms');
 
   setText('m-cost-pct', '−' + costSave + '%');
-  setText('m-cost-old', '$' + cost.baseline.toFixed(2));
-  setText('m-cost-new', '$' + cost.optimized.toFixed(2));
+  setText('m-cost-note', 'throughput-derived · rate-independent');
 
   document.getElementById('metrics').classList.add('show');
   setTimeout(function(){ document.getElementById('callout').classList.add('show'); }, 180);
