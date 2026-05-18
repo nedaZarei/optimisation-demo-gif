@@ -171,6 +171,10 @@
       "cost_per_1m": { "baseline": 2.40,   "optimized": 1.39,   "unit": "$" }
     }
   },
+  "bench_serve": {
+    "description": "vllm bench serve ABBA · 100 prompts × 512in/512out · max-concurrency 32 · request-rate inf",
+    "ttft_ms": { "baseline": 65267, "optimized": 34314 }
+  },
   "cross_hardware": [
     {
       "model": "Qwen3-8B AWQ",

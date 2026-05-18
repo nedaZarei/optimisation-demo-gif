@@ -129,7 +129,7 @@ _RACE_HTML = r"""<!DOCTYPE html>
 body {
   font-family: var(--font-sans);
   background: var(--color-background);
-  padding: 2px 2px 6px;
+  padding: 2px 2px 16px;
   -webkit-font-smoothing: antialiased;
   color: var(--color-slate-100);
 }
@@ -386,6 +386,15 @@ body {
   line-height: 1.4;
   margin-top: 2px;
 }
+.mc-secondary {
+  font-size: .68rem;
+  font-family: var(--font-mono);
+  color: var(--color-slate-600);
+  line-height: 1.5;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid var(--color-border);
+}
 
 /* ── Callout ── */
 .callout {
@@ -423,7 +432,8 @@ body {
 .co-note {
   font-size: .7rem;
   color: var(--color-slate-600);
-  line-height: 1.5;
+  line-height: 1.6;
+  white-space: pre-line;
 }
 </style>
 </head>
@@ -504,6 +514,7 @@ body {
       <span class="mc-arr">→</span>
       <span class="mc-new-v" id="m-ttft-new"></span>
     </div>
+    <div class="mc-secondary" id="m-ttft-conc" style="display:none"></div>
   </div>
   <div class="mc">
     <div class="mc-lbl">Cost per Token</div>
@@ -520,7 +531,7 @@ body {
     <span class="co-pill">✓ Quality intact</span>
   </div>
   <div class="co-headline">No tradeoffs. Just faster, cheaper inference.</div>
-  <div class="co-note">Quality validated via semantic similarity ≥ 0.92 (all-MiniLM-L6-v2) across 50 runs at temp=0, seed=42 &nbsp;·&nbsp; Live panel runs at temp=1.0</div>
+  <div class="co-note" id="co-note"></div>
 </div>
 
 <script>
@@ -697,20 +708,33 @@ function finish(bTtft,aTtft,bTps,aTps,bEnd,aEnd) {
   var btn = document.getElementById('run-btn');
   btn.disabled = false; btn.textContent = '↺ Compare again';
 
-  var tpsGain  = Math.round((aTps - bTps)  / bTps  * 100);
-  var ttftSave = Math.round((bTtft - aTtft) / bTtft * 100);
+  var tpsGain  = Math.round((aTps - bTps) / bTps * 100);
   var costSave = Math.round((1 - bTps / aTps) * 100);
 
-  setText('m-tps-pct',  '+' + tpsGain  + '%');
-  setText('m-tps-old',  bTps.toFixed(1) + ' tok/s');
-  setText('m-tps-new',  aTps.toFixed(1) + ' tok/s');
-
-  setText('m-ttft-pct', '−' + ttftSave + '%');
-  setText('m-ttft-old', bTtft + ' ms');
-  setText('m-ttft-new', aTtft + ' ms');
+  setText('m-tps-pct', '+' + tpsGain + '%');
+  setText('m-tps-old', bTps.toFixed(1) + ' tok/s');
+  setText('m-tps-new', aTps.toFixed(1) + ' tok/s');
 
   setText('m-cost-pct', '−' + costSave + '%');
   setText('m-cost-note', 'throughput-derived · rate-independent');
+
+  // TTFT: use bench_serve (concurrent ABBA) as headline if available, else per-prompt sequential
+  var bs = ALL[curCfg].bench_serve;
+  if (bs && bs.ttft_ms && bs.ttft_ms.baseline && bs.ttft_ms.optimized) {
+    var bsTtftSave = Math.round((bs.ttft_ms.baseline - bs.ttft_ms.optimized) / bs.ttft_ms.baseline * 100);
+    setText('m-ttft-pct', '−' + bsTtftSave + '%');
+    setText('m-ttft-old', bs.ttft_ms.baseline.toLocaleString() + ' ms');
+    setText('m-ttft-new', bs.ttft_ms.optimized.toLocaleString() + ' ms');
+    document.getElementById('m-ttft-conc').style.display = 'none';
+    var cfg = ALL[curCfg].meta;
+    setText('co-note', cfg.model + ' · ' + cfg.framework + ' · ' + cfg.hardware + '.\nThroughput and TTFT measured under concurrent load (32 req, ABBA design).\nQuality validated via semantic similarity ≥ 0.92 · all-MiniLM-L6-v2 · 50 runs per scenario');
+  } else {
+    var ttftSave = Math.round((bTtft - aTtft) / bTtft * 100);
+    setText('m-ttft-pct', '−' + ttftSave + '%');
+    setText('m-ttft-old', bTtft + ' ms');
+    setText('m-ttft-new', aTtft + ' ms');
+    setText('co-note', 'Quality validated via semantic similarity ≥ 0.92 · all-MiniLM-L6-v2 · 50 runs per scenario');
+  }
 
   document.getElementById('metrics').classList.add('show');
   setTimeout(function(){ document.getElementById('callout').classList.add('show'); }, 180);
@@ -762,7 +786,7 @@ def render_race(all_data: list):
         .replace("__HACK_REGULAR__", hack_regular_src)
         .replace("__HACK_BOLD__", hack_bold_src)
     )
-    st.components.v1.html(html, height=670, scrolling=False)
+    st.components.v1.html(html, height=800, scrolling=False)
 
 
 # ── Main ──────────────────────────────────────────────────────────────────────
