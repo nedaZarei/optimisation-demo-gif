@@ -727,7 +727,7 @@ function finish(bTtft,aTtft,bTps,aTps,bEnd,aEnd) {
     setText('m-ttft-new', bs.ttft_ms.optimized.toLocaleString() + ' ms');
     document.getElementById('m-ttft-conc').style.display = 'none';
     var cfg = ALL[curCfg].meta;
-    setText('co-note', cfg.model + ' · ' + cfg.framework + ' · ' + cfg.hardware + '.\nThroughput and TTFT measured under concurrent load (32 req, ABBA design).\nQuality validated via semantic similarity ≥ 0.92 · all-MiniLM-L6-v2 · 50 runs per scenario');
+    setText('co-note', cfg.model + ' · ' + cfg.framework + ' · ' + cfg.hardware + '.\nThroughput and TTFT measured under concurrent load (32 req, ABBA design) on vLLM bench serve benchmark.\nQuality validated via semantic similarity ≥ 0.92 · all-MiniLM-L6-v2 · 50 runs per scenario');
   } else {
     var ttftSave = Math.round((bTtft - aTtft) / bTtft * 100);
     setText('m-ttft-pct', '−' + ttftSave + '%');
