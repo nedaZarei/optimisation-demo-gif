@@ -263,6 +263,7 @@ body {
   border-radius: var(--radius-xl);
   padding: 16px 18px;
   min-height: 195px;
+  min-width: 0;
   display: flex;
   flex-direction: column;
 }
@@ -313,6 +314,98 @@ body {
 }
 .card-body strong { color: var(--color-slate-200); }
 .placeholder { color: var(--color-slate-700); font-style: italic; }
+.code-block {
+  background: #0d1117;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: var(--radius-md);
+  padding: 10px 13px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  line-height: 1.65;
+  overflow-x: auto;
+  margin: 6px 0 2px;
+  color: #c9d1d9;
+  white-space: pre;
+  word-break: normal;
+}
+
+/* ── Concurrent lanes view ── */
+.lanes-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.lane-col {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: 16px 18px;
+  min-width: 0;
+}
+.lane-col-opt {
+  background: #0b1a11;
+  border-color: rgba(74, 222, 128, 0.25);
+}
+.lane-col-hdr {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.lane {
+  display: grid;
+  grid-template-columns: 48px 1fr 54px;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 9px;
+}
+.lane-lbl {
+  font-size: .72rem;
+  color: var(--color-slate-500);
+  font-family: var(--font-mono);
+}
+.lane-bar-wrap {
+  background: var(--color-slate-800);
+  border-radius: var(--radius-full);
+  height: 7px;
+  overflow: hidden;
+}
+.lane-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: var(--radius-full);
+  background: var(--color-slate-600);
+}
+.lane-fill-opt { background: var(--color-success); }
+.lane-time {
+  font-family: var(--font-mono);
+  font-size: .72rem;
+  color: var(--color-slate-700);
+  text-align: right;
+  white-space: nowrap;
+}
+.lane-done     { color: var(--color-slate-300); }
+.lane-done-opt { color: var(--color-success); }
+.lane-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  border-top: 1px solid var(--color-border);
+  padding-top: 10px;
+  margin-top: 4px;
+}
+.lane-total-opt { border-color: rgba(74,222,128,0.15); }
+.lane-total-lbl { font-size: .72rem; color: var(--color-slate-600); }
+.lane-total-val {
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-slate-500);
+  letter-spacing: -.5px;
+}
+.lane-total-done     { color: var(--color-slate-200); }
+.lane-total-done-opt { color: var(--color-success); }
 .card-footer {
   display: flex;
   justify-content: space-between;
@@ -446,11 +539,11 @@ body {
 
 <!-- Spec bar with inline cascade selects -->
 <div class="spec-bar">
-  <span class="spec-lbl">Model:</span>
-  <select class="sb-sel" id="sb-model" onchange="onModelSel(this.value)"></select>
-  <span class="spec-sep">·</span>
   <span class="spec-lbl">Framework:</span>
   <select class="sb-sel" id="sb-fw" onchange="onFwSel(this.value)"></select>
+  <span class="spec-sep">·</span>
+  <span class="spec-lbl">Model:</span>
+  <select class="sb-sel" id="sb-model" onchange="onModelSel(this.value)"></select>
   <span class="spec-sep">·</span>
   <span class="spec-lbl">Hardware:</span>
   <select class="sb-sel" id="sb-hw" onchange="onHwSel(this.value)"></select>
@@ -458,17 +551,18 @@ body {
 
 <!-- Selector row: prompt only -->
 <div class="sel-row">
-  <div class="sel-wrap">
+  <div class="sel-wrap" id="prompt-sel-wrap">
     <select id="prompt-sel" onchange="onPromptChange(this.value)"></select>
   </div>
   <button class="run-btn" id="run-btn" onclick="startRace()">&#9654; Compare</button>
 </div>
 
-<!-- Prompt preview -->
+<!-- Prompt preview / scenario info -->
 <div class="prompt-box" id="prompt-box"></div>
+<div class="prompt-box" id="scenario-info" style="display:none"></div>
 
-<!-- Response cards -->
-<div class="cards-row">
+<!-- Response cards (sequential race) -->
+<div class="cards-row" id="race-view">
   <div class="card">
     <div class="card-hdr">
       <span class="card-title">Baseline</span>
@@ -478,7 +572,7 @@ body {
     <div class="card-body" id="text-b"><span class="placeholder">Select a prompt and click Compare</span></div>
     <div class="card-footer" id="foot-b" style="display:none">
       <span>TTFT <strong id="ttft-b">—</strong></span>
-      <span>tok/s <strong id="tps-b">—</strong></span>
+      <span id="tps-span-b">tok/s <strong id="tps-b">—</strong></span>
     </div>
   </div>
   <div class="card card-opt">
@@ -490,10 +584,13 @@ body {
     <div class="card-body" id="text-a"><span class="placeholder">Select a prompt and click Compare</span></div>
     <div class="card-footer card-footer-opt" id="foot-a" style="display:none">
       <span>TTFT <strong id="ttft-a">—</strong></span>
-      <span>tok/s <strong id="tps-a">—</strong></span>
+      <span id="tps-span-a">tok/s <strong id="tps-a">—</strong></span>
     </div>
   </div>
 </div>
+
+<!-- Concurrent lanes view -->
+<div id="concurrent-view" style="display:none"></div>
 
 <!-- Metrics -->
 <div class="metrics-row" id="metrics">
@@ -540,41 +637,41 @@ var curCfg = 0, curPrompt = 0;
 var raf = null, t0 = null, bDone = false, aDone = false;
 
 (function init() {
-  buildModelSel();
+  buildFwSel();
   selectModelByIdx(0);
 })();
 
 // ── Spec bar cascade ──────────────────────────────────────────────────────────
-function buildModelSel() {
-  var ms = document.getElementById('sb-model');
-  ms.innerHTML = '';
-  var seen = {};
-  ALL.forEach(function(cfg, i) {
-    var m = cfg.meta.model;
-    if (!seen[m]) { seen[m] = true; addOpt(ms, m, m); }
-  });
-}
-
-function onModelSel(model) {
+function buildFwSel() {
   var fs = document.getElementById('sb-fw');
   fs.innerHTML = '';
   var seen = {};
   ALL.forEach(function(cfg) {
-    if (cfg.meta.model === model && !seen[cfg.meta.framework]) {
-      seen[cfg.meta.framework] = true;
-      addOpt(fs, cfg.meta.framework, cfg.meta.framework);
-    }
+    var f = cfg.meta.framework;
+    if (!seen[f]) { seen[f] = true; addOpt(fs, f, f); }
   });
-  onFwSel(fs.value);
 }
 
 function onFwSel(fw) {
-  var model = document.getElementById('sb-model').value;
+  var ms = document.getElementById('sb-model');
+  ms.innerHTML = '';
+  var seen = {};
+  ALL.forEach(function(cfg) {
+    if (cfg.meta.framework === fw && !seen[cfg.meta.model]) {
+      seen[cfg.meta.model] = true;
+      addOpt(ms, cfg.meta.model, cfg.meta.model);
+    }
+  });
+  onModelSel(ms.value);
+}
+
+function onModelSel(model) {
+  var fw = document.getElementById('sb-fw').value;
   var hs = document.getElementById('sb-hw');
   hs.innerHTML = '';
   var seen = {};
   ALL.forEach(function(cfg) {
-    if (cfg.meta.model === model && cfg.meta.framework === fw && !seen[cfg.meta.hardware]) {
+    if (cfg.meta.framework === fw && cfg.meta.model === model && !seen[cfg.meta.hardware]) {
       seen[cfg.meta.hardware] = true;
       addOpt(hs, cfg.meta.hardware, cfg.meta.hardware);
     }
@@ -583,21 +680,21 @@ function onFwSel(fw) {
 }
 
 function onHwSel(hw) {
-  var model = document.getElementById('sb-model').value;
   var fw    = document.getElementById('sb-fw').value;
+  var model = document.getElementById('sb-model').value;
   var idx = 0;
   ALL.forEach(function(cfg, i) {
-    if (cfg.meta.model === model && cfg.meta.framework === fw && cfg.meta.hardware === hw) idx = i;
+    if (cfg.meta.framework === fw && cfg.meta.model === model && cfg.meta.hardware === hw) idx = i;
   });
   loadCfg(idx);
 }
 
 function selectModelByIdx(cfgIdx) {
-  var model = ALL[cfgIdx].meta.model;
-  document.getElementById('sb-model').value = model;
-  onModelSel(model);
-  document.getElementById('sb-fw').value = ALL[cfgIdx].meta.framework;
-  onFwSel(ALL[cfgIdx].meta.framework);
+  var fw = ALL[cfgIdx].meta.framework;
+  document.getElementById('sb-fw').value = fw;
+  onFwSel(fw);
+  document.getElementById('sb-model').value = ALL[cfgIdx].meta.model;
+  onModelSel(ALL[cfgIdx].meta.model);
   document.getElementById('sb-hw').value = ALL[cfgIdx].meta.hardware;
   loadCfg(cfgIdx);
 }
@@ -609,14 +706,28 @@ function addOpt(sel, val, txt) {
 // ── Config / prompt loading ───────────────────────────────────────────────────
 function loadCfg(idx) {
   curCfg = idx;
-  var ps = document.getElementById('prompt-sel');
-  ps.innerHTML = '';
-  ALL[idx].demo_prompts.forEach(function(p, i) {
-    addOpt(ps, i, p.label);
-  });
-  curPrompt = 0;
-  updatePromptBox();
+  var isConcurrent = !!(ALL[idx].concurrent_demo);
+
+  document.getElementById('race-view').style.display         = isConcurrent ? 'none' : '';
+  document.getElementById('concurrent-view').style.display   = isConcurrent ? ''     : 'none';
+  document.getElementById('prompt-sel-wrap').style.display   = isConcurrent ? 'none' : '';
+  document.getElementById('prompt-box').style.display        = isConcurrent ? 'none' : '';
+  document.getElementById('scenario-info').style.display     = isConcurrent ? ''     : 'none';
+  document.getElementById('run-btn').innerHTML = isConcurrent ? '&#9654; Run simulation' : '&#9654; Compare';
+
+  if (isConcurrent) {
+    var cd = ALL[idx].concurrent_demo;
+    document.getElementById('scenario-info').textContent = cd.scenario_label + '  ·  ' + cd.scenario_description;
+    renderConcurrentView(cd);
+  } else {
+    var ps = document.getElementById('prompt-sel');
+    ps.innerHTML = '';
+    ALL[idx].demo_prompts.forEach(function(p, i) { addOpt(ps, i, p.label); });
+    curPrompt = 0;
+    updatePromptBox();
+  }
   resetCards();
+  document.querySelectorAll('#metrics .mc-lbl')[1].textContent = 'Time to First Token';
 }
 
 function onPromptChange(v) {
@@ -635,17 +746,31 @@ function updatePromptBox() {
 function resetCards() {
   if (raf) { cancelAnimationFrame(raf); raf = null; }
   bDone = false; aDone = false;
+  document.getElementById('metrics').classList.remove('show');
+  document.getElementById('callout').classList.remove('show');
+
+  if (ALL[curCfg] && ALL[curCfg].concurrent_demo) {
+    resetConcurrentLanes();
+    var btn = document.getElementById('run-btn');
+    btn.disabled = false; btn.innerHTML = '&#9654; Run simulation';
+    return;
+  }
+
   var ph = '<span class="placeholder">Select a prompt and click Compare</span>';
   setHtml('text-b', ph); setHtml('text-a', ph);
   setText('time-b', ''); setText('time-a', '');
   hide('done-b'); hide('done-a'); hide('foot-b'); hide('foot-a');
-  document.getElementById('metrics').classList.remove('show');
-  document.getElementById('callout').classList.remove('show');
+  show('tps-span-b'); show('tps-span-a');
   var btn = document.getElementById('run-btn');
   btn.disabled = false; btn.innerHTML = '&#9654; Compare';
 }
 
 function startRace() {
+  if (ALL[curCfg].concurrent_demo) { startConcurrentRace(); return; }
+  startSequentialRace();
+}
+
+function startSequentialRace() {
   resetCards();
   var btn = document.getElementById('run-btn');
   btn.disabled = true; btn.textContent = '⏳ Running…';
@@ -658,6 +783,8 @@ function startRace() {
   var aTxt  = strip(a.text || '');
   var bTtft = b.ttft_ms, aTtft = a.ttft_ms;
   var bTps  = b.tps,     aTps  = a.tps;
+
+  var hideFooterTps = !!(ALL[curCfg].bench_serve && ALL[curCfg].bench_serve.tps);
 
   // Use recorded P50 total latency when available; compute chars/sec from it
   var bEnd = b.total_ms ? b.total_ms / 1000 : bTtft/1000 + bTxt.length / (bTps * 4.5);
@@ -681,6 +808,7 @@ function startRace() {
         setHtml('text-b', renderText(bTxt));
         setText('time-b', bEnd.toFixed(1) + 's');
         show('done-b'); setText('ttft-b', bTtft + 'ms'); setText('tps-b', bTps.toFixed(1)); show('foot-b');
+        if (hideFooterTps) hide('tps-span-b');
       }
     }
 
@@ -695,6 +823,7 @@ function startRace() {
         setHtml('text-a', renderText(aTxt));
         setText('time-a', aEnd.toFixed(1) + 's');
         show('done-a'); setText('ttft-a', aTtft + 'ms'); setText('tps-a', aTps.toFixed(1)); show('foot-a');
+        if (hideFooterTps) hide('tps-span-a');
       }
     }
 
@@ -706,38 +835,170 @@ function startRace() {
 
 function finish(bTtft,aTtft,bTps,aTps,bEnd,aEnd) {
   var btn = document.getElementById('run-btn');
-  btn.disabled = false; btn.textContent = '↺ Compare again';
+  btn.disabled = false;
+  btn.textContent = ALL[curCfg].concurrent_demo ? '↺ Run again' : '↺ Compare again';
 
-  var tpsGain  = Math.round((aTps - bTps) / bTps * 100);
-  var costSave = Math.round((1 - bTps / aTps) * 100);
+  var bs = ALL[curCfg].bench_serve;
+
+  // Throughput: use bench_serve.tps (system concurrent) if available, else per-prompt sequential
+  var mBTps = (bs && bs.tps && bs.tps.baseline) ? bs.tps.baseline : bTps;
+  var mATps = (bs && bs.tps && bs.tps.optimized) ? bs.tps.optimized : aTps;
+  var tpsGain  = Math.round((mATps - mBTps) / mBTps * 100);
+  var costSave = Math.round((1 - mBTps / mATps) * 100);
 
   setText('m-tps-pct', '+' + tpsGain + '%');
-  setText('m-tps-old', bTps.toFixed(1) + ' tok/s');
-  setText('m-tps-new', aTps.toFixed(1) + ' tok/s');
+  setText('m-tps-old', mBTps.toFixed(1) + ' tok/s');
+  setText('m-tps-new', mATps.toFixed(1) + ' tok/s');
 
   setText('m-cost-pct', '−' + costSave + '%');
   setText('m-cost-note', 'throughput-derived · rate-independent');
 
-  // TTFT: use bench_serve (concurrent ABBA) as headline if available, else per-prompt sequential
-  var bs = ALL[curCfg].bench_serve;
+  // TTFT / latency: use bench_serve if available, else per-prompt sequential
   if (bs && bs.ttft_ms && bs.ttft_ms.baseline && bs.ttft_ms.optimized) {
     var bsTtftSave = Math.round((bs.ttft_ms.baseline - bs.ttft_ms.optimized) / bs.ttft_ms.baseline * 100);
     setText('m-ttft-pct', '−' + bsTtftSave + '%');
     setText('m-ttft-old', bs.ttft_ms.baseline.toLocaleString() + ' ms');
     setText('m-ttft-new', bs.ttft_ms.optimized.toLocaleString() + ' ms');
     document.getElementById('m-ttft-conc').style.display = 'none';
-    var cfg = ALL[curCfg].meta;
-    setText('co-note', cfg.model + ' · ' + cfg.framework + ' · ' + cfg.hardware + '.\nThroughput and TTFT measured under concurrent load (32 req, ABBA design) on vLLM bench serve benchmark.\nQuality validated via semantic similarity ≥ 0.92 · all-MiniLM-L6-v2 · 50 runs per scenario');
+    if (bs.latency_label) document.querySelectorAll('#metrics .mc-lbl')[1].textContent = bs.latency_label;
+    var cfg = ALL[curCfg];
+    if (cfg.callout_note) {
+      setText('co-note', cfg.callout_note);
+    } else {
+      setText('co-note', cfg.meta.model + ' · ' + cfg.meta.framework + ' · ' + cfg.meta.hardware + '.\nThroughput and TTFT measured under concurrent load (32 req, ABBA design) on vLLM bench serve benchmark.\nQuality validated via semantic similarity ≥ 0.92 · all-MiniLM-L6-v2 · 50 runs per scenario');
+    }
   } else {
     var ttftSave = Math.round((bTtft - aTtft) / bTtft * 100);
     setText('m-ttft-pct', '−' + ttftSave + '%');
     setText('m-ttft-old', bTtft + ' ms');
     setText('m-ttft-new', aTtft + ' ms');
-    setText('co-note', 'Quality validated via semantic similarity ≥ 0.92 · all-MiniLM-L6-v2 · 50 runs per scenario');
+    var cfg = ALL[curCfg];
+    setText('co-note', cfg.callout_note || 'Quality validated via semantic similarity ≥ 0.92 · all-MiniLM-L6-v2 · 50 runs per scenario');
   }
 
   document.getElementById('metrics').classList.add('show');
   setTimeout(function(){ document.getElementById('callout').classList.add('show'); }, 180);
+}
+
+// ── Concurrent lanes ─────────────────────────────────────────────────────────
+function renderConcurrentView(cd) {
+  function colHtml(lats, side, isOpt) {
+    var cls   = isOpt ? 'lane-col lane-col-opt' : 'lane-col';
+    var fill  = isOpt ? 'lane-fill lane-fill-opt' : 'lane-fill';
+    var title = isOpt ? '&#9889; Artemis-optimized' : 'Baseline';
+    var badge = isOpt ? 'badge badge-opt' : 'badge';
+    var h = '<div class="' + cls + '">';
+    h += '<div class="lane-col-hdr"><span class="card-title">' + title + '</span>';
+    h += '<span class="' + badge + '" id="done-' + side + '" style="display:none">Done</span></div>';
+    lats.forEach(function(_, i) {
+      h += '<div class="lane">';
+      h += '<div class="lane-lbl">Req ' + (i + 1) + '</div>';
+      h += '<div class="lane-bar-wrap"><div class="' + fill + '" id="fill-' + side + '-' + i + '"></div></div>';
+      h += '<div class="lane-time" id="ltime-' + side + '-' + i + '">—</div>';
+      h += '</div>';
+    });
+    var totCls = isOpt ? 'lane-total lane-total-opt' : 'lane-total';
+    h += '<div class="' + totCls + '">';
+    h += '<span class="lane-total-lbl">All ' + lats.length + ' done</span>';
+    h += '<span class="lane-total-val" id="ltotal-' + side + '">—</span>';
+    h += '</div></div>';
+    return h;
+  }
+  document.getElementById('concurrent-view').innerHTML =
+    '<div class="lanes-row">' +
+    colHtml(cd.baseline_latencies_ms, 'b', false) +
+    colHtml(cd.optimized_latencies_ms, 'a', true) +
+    '</div>';
+}
+
+function resetConcurrentLanes() {
+  var cd = ALL[curCfg] && ALL[curCfg].concurrent_demo;
+  if (!cd) return;
+  cd.baseline_latencies_ms.forEach(function(_, i) {
+    var f = document.getElementById('fill-b-' + i);
+    var t = document.getElementById('ltime-b-' + i);
+    if (f) f.style.width = '0%';
+    if (t) { t.textContent = '—'; t.className = 'lane-time'; }
+  });
+  cd.optimized_latencies_ms.forEach(function(_, j) {
+    var f = document.getElementById('fill-a-' + j);
+    var t = document.getElementById('ltime-a-' + j);
+    if (f) f.style.width = '0%';
+    if (t) { t.textContent = '—'; t.className = 'lane-time'; }
+  });
+  ['b','a'].forEach(function(s) {
+    var el = document.getElementById('ltotal-' + s);
+    if (el) { el.textContent = '—'; el.className = 'lane-total-val'; }
+    hide('done-' + s);
+  });
+}
+
+function startConcurrentRace() {
+  resetCards();
+  var btn = document.getElementById('run-btn');
+  btn.disabled = true; btn.textContent = '⏳ Running…';
+
+  var cd   = ALL[curCfg].concurrent_demo;
+  var bLats = cd.baseline_latencies_ms;
+  var aLats = cd.optimized_latencies_ms;
+  var spd   = cd.animation_speed || 1;
+
+  var bDoneArr = bLats.map(function() { return false; });
+  var aDoneArr = aLats.map(function() { return false; });
+  var bMaxSec  = Math.max.apply(null, bLats) / 1000 / spd;
+  var aMaxSec  = Math.max.apply(null, aLats) / 1000 / spd;
+
+  t0 = null;
+  function tick(ts) {
+    if (!t0) t0 = ts;
+    var el = (ts - t0) / 1000;
+
+    bLats.forEach(function(lat, i) {
+      var dur = lat / 1000 / spd;
+      document.getElementById('fill-b-' + i).style.width = Math.min(el / dur, 1) * 100 + '%';
+      var tEl = document.getElementById('ltime-b-' + i);
+      if (el >= dur && !bDoneArr[i]) {
+        bDoneArr[i] = true;
+        tEl.textContent = (lat / 1000).toFixed(1) + 's';
+        tEl.className = 'lane-time lane-done';
+      } else if (!bDoneArr[i]) {
+        tEl.textContent = (el * spd).toFixed(1) + 's';
+      }
+    });
+
+    aLats.forEach(function(lat, j) {
+      var dur = lat / 1000 / spd;
+      document.getElementById('fill-a-' + j).style.width = Math.min(el / dur, 1) * 100 + '%';
+      var tEl = document.getElementById('ltime-a-' + j);
+      if (el >= dur && !aDoneArr[j]) {
+        aDoneArr[j] = true;
+        tEl.textContent = (lat / 1000).toFixed(1) + 's';
+        tEl.className = 'lane-time lane-done-opt';
+      } else if (!aDoneArr[j]) {
+        tEl.textContent = (el * spd).toFixed(1) + 's';
+      }
+    });
+
+    var bTotEl = document.getElementById('ltotal-b');
+    var aTotEl = document.getElementById('ltotal-a');
+    var bRealMax = Math.max.apply(null, bLats) / 1000;
+    var aRealMax = Math.max.apply(null, aLats) / 1000;
+
+    if (el < bMaxSec) { bTotEl.textContent = (el * spd).toFixed(1) + 's'; }
+    else { bTotEl.textContent = bRealMax.toFixed(1) + 's'; bTotEl.className = 'lane-total-val lane-total-done'; }
+    if (el < aMaxSec) { aTotEl.textContent = (el * spd).toFixed(1) + 's'; }
+    else { aTotEl.textContent = aRealMax.toFixed(1) + 's'; aTotEl.className = 'lane-total-val lane-total-done-opt'; }
+
+    var allB = bDoneArr.every(Boolean);
+    var allA = aDoneArr.every(Boolean);
+    if (!allB || !allA) {
+      raf = requestAnimationFrame(tick);
+    } else {
+      show('done-b'); show('done-a');
+      finish(0, 0, 0, 0, bMaxSec, aMaxSec);
+    }
+  }
+  raf = requestAnimationFrame(tick);
 }
 
 function setText(id,v){ document.getElementById(id).textContent = v; }
@@ -748,11 +1009,31 @@ function hide(id){ document.getElementById(id).style.display = 'none'; }
 function strip(s) {
   return s.replace(/<think>[\s\S]*?<\/think>\n*/g, '').trim();
 }
-function renderText(s) {
+function renderMarkdown(s) {
   return s
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
     .replace(/\*\*([^*\n]+)\*\*/g,'<strong>$1</strong>')
     .replace(/\n/g,'<br>');
+}
+
+function renderText(s) {
+  var out = '', rest = s;
+  while (rest.length > 0) {
+    var fenceStart = rest.indexOf('```');
+    if (fenceStart === -1) { out += renderMarkdown(rest); break; }
+    out += renderMarkdown(rest.slice(0, fenceStart));
+    rest = rest.slice(fenceStart + 3);
+    var nlIdx = rest.indexOf('\n');
+    if (nlIdx === -1) { out += '```' + rest; break; }
+    rest = rest.slice(nlIdx + 1);
+    var fenceEnd = rest.indexOf('```');
+    var code = (fenceEnd === -1 ? rest : rest.slice(0, fenceEnd))
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    out += '<pre class="code-block"><code>' + code + '</code></pre>';
+    if (fenceEnd === -1) break;
+    rest = rest.slice(fenceEnd + 3);
+  }
+  return out;
 }
 </script>
 </body>
@@ -786,7 +1067,7 @@ def render_race(all_data: list):
         .replace("__HACK_REGULAR__", hack_regular_src)
         .replace("__HACK_BOLD__", hack_bold_src)
     )
-    st.components.v1.html(html, height=800, scrolling=False)
+    st.components.v1.html(html, height=920, scrolling=False)
 
 
 # ── Main ──────────────────────────────────────────────────────────────────────
