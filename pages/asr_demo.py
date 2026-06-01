@@ -150,7 +150,7 @@ body{font-family:var(--font-sans);background:var(--color-bg);padding:2px 2px 16p
   <span class="chip">faster-whisper 1.2.1</span>
 </div>
 
-<button class="start-btn" id="start-btn" onclick="startRace()">&#9654; Run concurrent simulation</button>
+<button class="start-btn" id="start-btn" onclick="startRace()">&#9654; Run benchmark</button>
 
 <div class="race-row">
   <!-- Stock -->
@@ -424,7 +424,7 @@ function resetUI() {
   });
   document.getElementById('results-panel').style.display = 'none';
   document.getElementById('start-btn').disabled    = false;
-  document.getElementById('start-btn').textContent = '▶ Run concurrent simulation';
+  document.getElementById('start-btn').textContent = '▶ Run benchmark';
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
@@ -457,7 +457,7 @@ def render_asr_demo():
         .replace("__HACK_REGULAR__", hack_r)
         .replace("__HACK_BOLD__",    hack_b)
     )
-    st.components.v1.html(html, height=980, scrolling=False)
+    st.components.v1.html(html, height=1060, scrolling=False)
 
 
 render_asr_demo()
