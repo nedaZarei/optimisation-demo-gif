@@ -362,6 +362,7 @@ body {
 .co-pill { background: rgba(74, 222, 128, 0.12); color: var(--color-success); border-radius: var(--radius-full); padding: 4px 14px; font-size: .75rem; font-weight: 600; }
 .co-headline { font-size: 1.1rem; font-weight: 800; color: var(--color-slate-100); line-height: 1.3; margin-bottom: 8px; }
 .co-note { font-size: .7rem; color: var(--color-slate-600); line-height: 1.6; white-space: pre-line; }
+.sb-load { font-size: .72rem; color: var(--color-slate-500); font-style: italic; }
 </style>
 </head>
 <body>
@@ -379,6 +380,8 @@ body {
   <span class="spec-sep">·</span>
   <span class="spec-lbl">Hardware:</span>
   <select class="sb-sel" id="sb-hw" onchange="onHwSel(this.value)"></select>
+  <span id="sb-load-sep" class="spec-sep" style="display:none">·</span>
+  <span id="sb-load" class="sb-load" style="display:none"></span>
 </div>
 
 <div class="sel-row">
@@ -530,6 +533,12 @@ function loadCfg(idx) {
     ALL[idx].demo_prompts.forEach(function(p, i) { addOpt(ps, i, p.label); });
     curPrompt = 0; updatePromptBox();
   }
+  // load context label in spec-bar
+  var lcEl = document.getElementById('sb-load');
+  var lcSep = document.getElementById('sb-load-sep');
+  var lc = (ALL[idx].bench_serve && ALL[idx].bench_serve.load_context) || '';
+  if (lcEl) { lcEl.textContent = lc; lcEl.style.display = lc ? '' : 'none'; }
+  if (lcSep) { lcSep.style.display = lc ? '' : 'none'; }
   resetCards();
   document.querySelectorAll('#metrics .mc-lbl')[1].textContent = 'Time to First Token';
 }
@@ -571,10 +580,34 @@ function startSequentialRace() {
   var b = p.recorded.baseline, a = p.recorded.optimized;
   var bTxt = strip(b.text||''), aTxt = strip(a.text||'');
   var bTtft = b.ttft_ms, aTtft = a.ttft_ms;
+
+  // Derive per-request tok/s from concurrent benchmark:
+  //   bench_serve.tps / slots (per-slot rate) → benchmark concurrent tps → recorded
+  var bs = ALL[curCfg].bench_serve;
   var bTps = b.tps, aTps = a.tps;
-  var hideFooterTps = !!(ALL[curCfg].bench_serve && ALL[curCfg].bench_serve.tps);
-  var bEnd = b.total_ms ? b.total_ms/1000 : bTtft/1000 + bTxt.length/(bTps*4.5);
-  var aEnd = a.total_ms ? a.total_ms/1000 : aTtft/1000 + aTxt.length/(aTps*4.5);
+  if (bs && bs.tps && bs.tps.baseline) {
+    var slots = bs.slots || 1;
+    bTps = bs.tps.baseline / slots; aTps = bs.tps.optimized / slots;
+  } else {
+    var bm = ALL[curCfg].benchmark;
+    if (bm && bm.scenarios) {
+      var skeys = Object.keys(bm.scenarios);
+      for (var si = 0; si < skeys.length; si++) {
+        var sc = bm.scenarios[skeys[si]].concurrent;
+        if (sc && sc.throughput_tps && sc.throughput_tps.baseline) {
+          bTps = sc.throughput_tps.baseline; aTps = sc.throughput_tps.optimized; break;
+        }
+      }
+    }
+  }
+
+  // Compute natural duration from per-request tps, always scale baseline to TARGET
+  var CHARS_PER_TOK = 4.5, TARGET = 9.0;
+  var bEnd = bTtft/1000 + bTxt.length / (bTps * CHARS_PER_TOK);
+  var aEnd = aTtft/1000 + aTxt.length / (aTps * CHARS_PER_TOK);
+  var tScale = TARGET / bEnd;
+  bEnd *= tScale; aEnd *= tScale;
+
   var bCps = bTxt.length / Math.max(bEnd - bTtft/1000, 0.001);
   var aCps = aTxt.length / Math.max(aEnd - aTtft/1000, 0.001);
   t0 = null;
@@ -590,7 +623,6 @@ function startSequentialRace() {
       if (el >= bEnd) {
         bDone = true; setHtml('text-b', renderText(bTxt)); setText('time-b', bEnd.toFixed(1)+'s');
         show('done-b'); setText('ttft-b', bTtft+'ms'); setText('tps-b', bTps.toFixed(1)); show('foot-b');
-        if (hideFooterTps) hide('tps-span-b');
       }
     }
     if (!aDone) {
@@ -602,7 +634,6 @@ function startSequentialRace() {
       if (el >= aEnd) {
         aDone = true; setHtml('text-a', renderText(aTxt)); setText('time-a', aEnd.toFixed(1)+'s');
         show('done-a'); setText('ttft-a', aTtft+'ms'); setText('tps-a', aTps.toFixed(1)); show('foot-a');
-        if (hideFooterTps) hide('tps-span-a');
       }
     }
     if (!bDone || !aDone) { raf = requestAnimationFrame(tick); }

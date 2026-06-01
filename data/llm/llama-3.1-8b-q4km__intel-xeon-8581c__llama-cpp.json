@@ -171,17 +171,12 @@
       "cost_per_1m": { "baseline": null,   "optimized": null,   "unit": "$" }
     }
   },
-  "concurrent_demo": {
-    "scenario_label": "large_prompt_v1",
-    "scenario_description": "~1500 token inputs · 4 parallel slots · no-cache-prompt",
-    "animation_speed": 2,
-    "baseline_latencies_ms": [8238, 10198, 13279, 15389],
-    "optimized_latencies_ms": [7015, 8594, 11088, 13969]
-  },
   "bench_serve": {
     "description": "Artemis concurrent · 4 parallel slots · no-cache-prompt. Throughput: large_prompt_v1 (~1500 tokens). P95 latency: long_context_v1 (~6500 tokens).",
     "latency_label": "P95 Latency (Concurrent)",
     "tps": { "baseline": 39, "optimized": 48 },
+    "slots": 4,
+    "load_context": "4 concurrent requests · server under load",
     "ttft_ms": { "baseline": 21516, "optimized": 17502 }
   },
   "callout_note": "Llama-3.1-8B Q4_K_M · llama.cpp · Intel Xeon 8581C Sapphire Rapids.\nThroughput (+23.1%) and P95 latency (−18.7%) measured under concurrent load · Artemis benchmark · 4 parallel slots.\nQuality validated: perplexity 8.4042 → 8.3973 on WikiText-2 (within noise) · semantic similarity ≥ 0.92 · all-MiniLM-L6-v2 · 50 runs per scenario",
