@@ -601,12 +601,21 @@ function startSequentialRace() {
     }
   }
 
-  // Compute natural duration from per-request tps, always scale baseline to TARGET
-  var CHARS_PER_TOK = 4.5, TARGET = 9.0;
-  var bEnd = bTtft/1000 + bTxt.length / (bTps * CHARS_PER_TOK);
-  var aEnd = aTtft/1000 + aTxt.length / (aTps * CHARS_PER_TOK);
-  var tScale = TARGET / bEnd;
-  bEnd *= tScale; aEnd *= tScale;
+  // Use real measured total_ms for timing ratio (captures actual per-prompt speedup including
+  // output length differences). Fall back to tps-based estimate if not recorded.
+  var bEnd_nat, aEnd_nat;
+  if (b.total_ms && a.total_ms) {
+    bEnd_nat = b.total_ms / 1000;
+    aEnd_nat = a.total_ms / 1000;
+  } else {
+    var CHARS_PER_TOK = 4.5;
+    bEnd_nat = bTtft/1000 + bTxt.length / (bTps * CHARS_PER_TOK);
+    aEnd_nat = aTtft/1000 + aTxt.length / (aTps * CHARS_PER_TOK);
+  }
+  var TARGET = 9.0;
+  var tScale = TARGET / bEnd_nat;
+  var bEnd = bEnd_nat * tScale;
+  var aEnd = aEnd_nat * tScale;
 
   var bCps = bTxt.length / Math.max(bEnd - bTtft/1000, 0.001);
   var aCps = aTxt.length / Math.max(aEnd - aTtft/1000, 0.001);
@@ -646,8 +655,8 @@ function finish(bTtft,aTtft,bTps,aTps,bEnd,aEnd) {
   btn.disabled = false;
   btn.textContent = ALL[curCfg].concurrent_demo ? '↺ Run again' : '↺ Compare again';
   var bs = ALL[curCfg].bench_serve;
-  var mBTps = (bs&&bs.tps&&bs.tps.baseline) ? bs.tps.baseline : bTps;
-  var mATps = (bs&&bs.tps&&bs.tps.optimized) ? bs.tps.optimized : aTps;
+  var mBTps = bTps;   // already per-slot for llama.cpp, per-request for vLLM
+  var mATps = aTps;
   var tpsGain = Math.round((mATps-mBTps)/mBTps*100);
   var costSave = Math.round((1-mBTps/mATps)*100);
   setText('m-tps-pct', '+'+tpsGain+'%'); setText('m-tps-old', mBTps.toFixed(1)+' tok/s'); setText('m-tps-new', mATps.toFixed(1)+' tok/s');
@@ -801,7 +810,7 @@ def render_llm_demo():
         .replace("__HACK_REGULAR__",  hack_r)
         .replace("__HACK_BOLD__",     hack_b)
     )
-    st.components.v1.html(html, height=920, scrolling=False)
+    st.components.v1.html(html, height=1040, scrolling=False)
 
 
 render_llm_demo()
