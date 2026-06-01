@@ -64,5 +64,29 @@
     "sha1_identical": true,
     "transcript_determinism": true
   },
-  "callout_note": "faster-whisper large-v3 · NVIDIA RTX 3090 · Beast3 (int8_float16 · beam=5 · batch=32).\nProcessing speed improved 15–17% with identical transcription accuracy.\nSHA1-identical output across all runs · WER delta ≈ 0% · 6/6 noise conditions pass."
+  "callout_note": "faster-whisper large-v3 · NVIDIA RTX 3090 · Beast3 (int8_float16 · beam=5 · batch=32).\n4-stream concurrent benchmark · long_form_v1 (21-min audio) · Artemis ASR Bench.\nSHA1-identical output · WER delta ≈ 0% · 6/6 noise conditions pass.",
+  "concurrent_demo": {
+    "num_streams": 4,
+    "files_per_stream": 3,
+    "file_duration_s": 300,
+    "scenario": "long_form_v1 · 21-min audio · 4 parallel streams",
+    "baseline": {
+      "rtf_per_stream": 0.0096,
+      "aggregate_audio_sec_per_sec": 417,
+      "files_per_hour": 5000
+    },
+    "optimized": {
+      "rtf_per_stream": 0.0073,
+      "aggregate_audio_sec_per_sec": 548,
+      "files_per_hour": 6575
+    },
+    "improvement_pct": 31.5,
+    "scale_reference_audio_hours": 1000,
+    "stream_files": [
+      ["meeting_q1_summary.flac",  "weekly_standup_07.flac",   "board_review_dec.flac"],
+      ["customer_call_047.flac",   "support_ticket_112.flac",  "sales_pitch_q2.flac"],
+      ["podcast_ep_112.flac",      "lecture_cs101_03.flac",    "earnings_call_q4.flac"],
+      ["interview_raw_07.flac",    "deposition_case_44.flac",  "medical_rounds_09.flac"]
+    ]
+  }
 }

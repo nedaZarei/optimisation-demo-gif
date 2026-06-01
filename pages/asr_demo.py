@@ -22,8 +22,8 @@ _ASR_HTML = r"""<!DOCTYPE html>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,75..125,100..900;1,75..125,100..900&display=swap" rel="stylesheet">
 <style>
-@font-face { font-family:'Hack'; src:url('__HACK_REGULAR__') format('truetype'); font-weight:400; font-style:normal; font-display:swap; }
-@font-face { font-family:'Hack'; src:url('__HACK_BOLD__')    format('truetype'); font-weight:700; font-style:normal; font-display:swap; }
+@font-face { font-family:'Hack'; src:url('__HACK_REGULAR__') format('truetype'); font-weight:400; font-display:swap; }
+@font-face { font-family:'Hack'; src:url('__HACK_BOLD__')    format('truetype'); font-weight:700; font-display:swap; }
 :root {
   --font-sans:'Archivo',system-ui,-apple-system,Segoe UI,sans-serif;
   --font-mono:'Hack',ui-monospace,SFMono-Regular,Menlo,monospace;
@@ -32,187 +32,404 @@ _ASR_HTML = r"""<!DOCTYPE html>
   --color-slate-400:#94a3b8; --color-slate-500:#64748b; --color-slate-600:#475569;
   --color-slate-700:#334155; --color-slate-800:#1e293b; --color-slate-900:#0f172a;
   --color-slate-950:#020617;
-  --color-background:var(--color-slate-950); --color-card:var(--color-slate-900);
+  --color-bg:var(--color-slate-950); --color-card:var(--color-slate-900);
   --color-border:rgba(255,255,255,0.1); --color-primary:var(--color-brand-400);
   --color-success:#4ade80;
-  --radius-lg:10px; --radius-xl:12px; --radius-full:9999px;
+  --r-md:8px; --r-lg:10px; --r-xl:12px; --r-full:9999px;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:var(--font-sans);background:var(--color-background);padding:2px 2px 16px;-webkit-font-smoothing:antialiased;color:var(--color-slate-100);}
-.logo-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+body{font-family:var(--font-sans);background:var(--color-bg);padding:2px 2px 16px;-webkit-font-smoothing:antialiased;color:var(--color-slate-100);}
+
+.logo-bar{display:flex;align-items:center;margin-bottom:16px;}
 .logo-bar img{display:block;}
-.bar-base{background:var(--color-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:10px 20px;display:flex;align-items:center;gap:6px;font-size:0.81rem;flex-wrap:wrap;}
-.spec-bar{margin-bottom:8px;}
-.clip-bar{margin-bottom:12px;gap:10px;}
-.bar-lbl{font-size:0.70rem;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--color-slate-500);white-space:nowrap;}
-.clip-divider{width:1px;height:16px;background:var(--color-slate-700);flex-shrink:0;}
-.clip-desc-inline{font-size:0.76rem;color:var(--color-slate-500);font-style:italic;margin-left:4px;}
+
+/* ── Spec bar ── */
+.spec-bar{background:var(--color-card);border:1px solid var(--color-border);border-radius:var(--r-lg);padding:10px 20px;display:flex;align-items:center;gap:6px;margin-bottom:10px;font-size:0.81rem;flex-wrap:wrap;}
 .spec-lbl{color:var(--color-slate-500);margin-right:2px;}
-.spec-sep{color:var(--color-slate-700);margin:0 10px;font-size:1rem;}
+.spec-sep{color:var(--color-slate-700);margin:0 10px;}
 .sb-sel{border:none;background:transparent;color:var(--color-slate-200);font-weight:700;font-size:0.81rem;font-family:var(--font-sans);cursor:pointer;outline:none;padding:0 18px 0 0;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%237b66ff' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 2px center;background-size:10px 6px;}
 .sb-sel:hover{color:var(--color-primary);}
-.sb-sel option{background:var(--color-card);color:var(--color-slate-200);}
-.scenario-chips{display:flex;align-items:center;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
-.chip{background:rgba(123,102,255,0.12);color:var(--color-brand-400);border:1px solid rgba(123,102,255,0.25);border-radius:var(--radius-full);padding:2px 10px;font-size:0.70rem;font-weight:600;letter-spacing:0.04em;}
-.start-btn{display:block;width:100%;padding:12px;background:var(--color-brand-400);color:white;font-family:var(--font-sans);font-size:0.875rem;font-weight:700;border:none;border-radius:var(--radius-lg);cursor:pointer;letter-spacing:0.03em;transition:background 0.2s,opacity 0.2s;margin-bottom:14px;}
+.sb-sel option{background:var(--color-card);}
+
+/* ── Scenario strip ── */
+.scenario-strip{display:flex;align-items:center;gap:8px;margin-bottom:12px;font-size:0.75rem;color:var(--color-slate-500);flex-wrap:wrap;}
+.chip{background:rgba(123,102,255,0.12);color:var(--color-brand-400);border:1px solid rgba(123,102,255,0.2);border-radius:var(--r-full);padding:2px 10px;font-size:0.70rem;font-weight:600;letter-spacing:0.04em;}
+
+/* ── Start button ── */
+.start-btn{display:block;width:100%;padding:12px;background:var(--color-brand-400);color:#fff;font-family:var(--font-sans);font-size:0.875rem;font-weight:700;border:none;border-radius:var(--r-lg);cursor:pointer;letter-spacing:0.03em;transition:background 0.2s;margin-bottom:14px;}
 .start-btn:hover:not(:disabled){background:var(--color-brand-500);}
 .start-btn:disabled{opacity:0.45;cursor:not-allowed;}
+
+/* ── Race columns ── */
 .race-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
-.proc-card{background:var(--color-card);border:1px solid var(--color-border);border-radius:var(--radius-xl);padding:16px 18px;}
-.proc-card-opt{background:#0b1a11;border-color:rgba(74,222,128,0.25);}
-.proc-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
-.proc-label{font-size:0.70rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-slate-400);}
-.proc-badge{font-size:0.68rem;font-weight:700;padding:3px 9px;border-radius:var(--radius-full);letter-spacing:0.04em;}
+
+.stream-col{background:var(--color-card);border:1px solid var(--color-border);border-radius:var(--r-xl);padding:16px 18px;}
+.stream-col-opt{background:#0b1a11;border-color:rgba(74,222,128,0.25);}
+
+/* column header */
+.col-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.07);}
+.stream-col-opt .col-hdr{border-color:rgba(74,222,128,0.1);}
+.col-title{font-size:0.70rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-slate-400);}
+.col-tally{font-family:var(--font-mono);font-size:0.72rem;color:var(--color-slate-500);}
+.col-tally strong{color:var(--color-slate-200);}
+.col-elapsed{font-family:var(--font-mono);font-size:1.05rem;font-weight:700;color:var(--color-slate-500);letter-spacing:-0.5px;}
+.col-elapsed-opt{color:var(--color-success);}
+
+/* stream lanes */
+.stream-lane{margin-bottom:10px;}
+.stream-lane:last-child{margin-bottom:0;}
+.lane-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+.lane-label{font-size:0.68rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-slate-600);}
+.lane-files{font-family:var(--font-mono);font-size:0.68rem;color:var(--color-slate-600);}
+.lane-files strong{color:var(--color-slate-300);}
+.lane-filename{font-family:var(--font-mono);font-size:0.70rem;color:var(--color-slate-600);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;height:14px;}
+.lane-filename.active{color:var(--color-slate-300);}
+.lane-bar-wrap{background:var(--color-slate-800);border-radius:var(--r-full);height:5px;overflow:hidden;}
+.lane-bar-fill{height:100%;border-radius:var(--r-full);width:0%;background:var(--color-slate-600);transition:width 0.08s linear;}
+.lane-bar-fill-opt{background:var(--color-success);}
+.lane-done-row{display:flex;align-items:center;gap:6px;margin-top:2px;font-size:0.68rem;font-family:var(--font-mono);}
+.lane-done-tick{color:var(--color-success);font-weight:700;}
+.lane-done-time{color:var(--color-slate-600);}
+
+/* column footer */
+.col-footer{display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.07);font-size:0.72rem;}
+.stream-col-opt .col-footer{border-color:rgba(74,222,128,0.1);}
+.footer-throughput{font-family:var(--font-mono);font-size:0.70rem;color:var(--color-slate-500);}
+.footer-throughput strong{color:var(--color-slate-300);}
+.footer-badge{font-size:0.65rem;font-weight:700;padding:2px 8px;border-radius:var(--r-full);letter-spacing:0.04em;}
 .badge-idle      {background:rgba(100,116,139,0.15);color:var(--color-slate-500);}
-.badge-processing{background:rgba(123,102,255,0.18);color:var(--color-brand-400);}
+.badge-running   {background:rgba(123,102,255,0.18);color:var(--color-brand-400);}
 .badge-done      {background:rgba(74,222,128,0.15); color:var(--color-success);}
-.waveform{display:flex;align-items:center;gap:2px;height:40px;margin-bottom:12px;}
-.wbar{flex:1;background:var(--color-brand-400);border-radius:2px;opacity:0.55;transform-origin:bottom;height:4px;transition:opacity 0.3s;}
-.proc-card-opt .wbar{background:var(--color-success);}
-.waveform.playing .wbar{animation:waveplay var(--dur,1.1s) ease-in-out infinite alternate;}
-@keyframes waveplay{from{transform:scaleY(0.15);opacity:0.4;}to{transform:scaleY(1);opacity:0.75;}}
-.waveform.done .wbar{animation:none;height:3px!important;opacity:0.2;}
-.proc-timer{font-family:var(--font-mono);font-size:1.6rem;font-weight:700;color:var(--color-slate-100);line-height:1;margin-bottom:4px;}
-.proc-timer .unit{font-size:0.85rem;font-weight:400;color:var(--color-slate-500);margin-left:3px;}
-.proc-rtf{font-family:var(--font-mono);font-size:0.72rem;color:var(--color-slate-500);margin-bottom:12px;}
-.proc-rtf .rtf-val{color:var(--color-slate-300);font-weight:600;}
-.progress-track{height:5px;background:var(--color-slate-800);border-radius:var(--radius-full);overflow:hidden;}
-.progress-fill{height:100%;border-radius:var(--radius-full);width:0%;}
-.fill-stock{background:var(--color-slate-600);}
-.fill-opt{background:linear-gradient(90deg,var(--color-brand-400),#a78bfa);}
-#transcript-panel{display:none;background:var(--color-card);border:1px solid rgba(74,222,128,0.2);border-radius:var(--radius-xl);padding:20px 22px;margin-bottom:12px;}
-.transcript-accuracy-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(74,222,128,0.10);color:var(--color-success);border:1px solid rgba(74,222,128,0.25);border-radius:var(--radius-full);padding:4px 14px;font-size:0.70rem;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:14px;}
-.transcript-subhead{font-size:0.75rem;color:var(--color-slate-500);margin-bottom:12px;font-style:italic;}
-.transcript-text{font-size:0.845rem;line-height:1.75;color:var(--color-slate-300);max-height:220px;overflow-y:auto;padding-right:8px;white-space:pre-wrap;}
+
+/* ── Results panels ── */
+#results-panel{display:none;}
+
+.scale-section{margin-bottom:12px;}
+.section-label{font-size:0.65rem;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;color:var(--color-slate-500);margin-bottom:8px;text-align:center;}
+.scale-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.scale-card{background:var(--color-card);border:1px solid var(--color-border);border-radius:var(--r-lg);padding:14px 16px;text-align:center;}
+.scale-lbl{font-size:0.62rem;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--color-slate-500);margin-bottom:6px;line-height:1.4;}
+.scale-val{font-family:var(--font-mono);font-size:1.5rem;font-weight:700;color:var(--color-success);line-height:1;margin-bottom:4px;}
+.scale-arrow{display:flex;align-items:center;justify-content:center;gap:5px;font-family:var(--font-mono);font-size:0.68rem;color:var(--color-slate-600);}
+.scale-arrow .old{text-decoration:line-through;}
+.scale-arrow .new{color:var(--color-slate-200);font-weight:700;}
+.scale-sub{font-size:0.66rem;color:var(--color-slate-500);margin-top:3px;}
+
+/* transcript */
+#transcript-panel{background:var(--color-card);border:1px solid rgba(74,222,128,0.2);border-radius:var(--r-xl);padding:18px 20px;margin-bottom:12px;}
+.transcript-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(74,222,128,0.10);color:var(--color-success);border:1px solid rgba(74,222,128,0.25);border-radius:var(--r-full);padding:4px 14px;font-size:0.68rem;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:12px;}
+.transcript-subhead{font-size:0.72rem;color:var(--color-slate-500);margin-bottom:10px;font-style:italic;}
+.transcript-text{font-size:0.81rem;line-height:1.75;color:var(--color-slate-300);max-height:170px;overflow-y:auto;padding-right:6px;white-space:pre-wrap;}
 .transcript-text::-webkit-scrollbar{width:4px;}
-.transcript-text::-webkit-scrollbar-track{background:transparent;}
 .transcript-text::-webkit-scrollbar-thumb{background:var(--color-slate-700);border-radius:4px;}
-.metrics-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px;}
-.metric-card{background:var(--color-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:14px 16px;text-align:center;}
-.metric-label{font-size:0.65rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-slate-500);margin-bottom:6px;}
-.metric-value{font-family:var(--font-mono);font-size:1.4rem;font-weight:700;color:var(--color-success);line-height:1;margin-bottom:4px;}
-.metric-sub{font-size:0.67rem;color:var(--color-slate-500);}
-.callout{background:rgba(123,102,255,0.06);border:1px solid rgba(123,102,255,0.18);border-radius:var(--radius-lg);padding:16px 20px;font-size:0.76rem;color:var(--color-slate-400);line-height:1.6;display:flex;align-items:center;justify-content:center;text-align:center;min-height:64px;}
+
+/* callout */
+#callout{background:rgba(123,102,255,0.06);border:1px solid rgba(123,102,255,0.18);border-radius:var(--r-lg);padding:14px 20px;font-size:0.75rem;color:var(--color-slate-400);line-height:1.65;text-align:center;}
 </style>
 </head>
 <body>
+
 <div class="logo-bar">
   <img src="__ARTEMIS_LOGO__" height="28" alt="Artemis">
 </div>
-<div class="bar-base spec-bar">
+
+<div class="spec-bar">
   <span class="spec-lbl">Framework</span>
   <select class="sb-sel"><option>faster-whisper</option></select>
-  <span class="spec-sep">|</span>
+  <span class="spec-sep">·</span>
   <span class="spec-lbl">Model</span>
   <select class="sb-sel"><option>whisper-large-v3</option></select>
-  <span class="spec-sep">|</span>
+  <span class="spec-sep">·</span>
   <span class="spec-lbl">Hardware</span>
   <select class="sb-sel"><option>NVIDIA RTX 3090 (Beast3)</option></select>
 </div>
-<div class="bar-base clip-bar">
-  <span class="bar-lbl">Audio clip</span>
-  <div class="clip-divider"></div>
-  <select class="sb-sel" id="sel-clip" onchange="onClipChange()"></select>
-  <span class="clip-desc-inline" id="clip-desc-inline"></span>
+
+<div class="scenario-strip">
+  <span class="chip" id="chip-scenario"></span>
+  <span class="chip">int8_float16 · beam=5 · batch=32</span>
+  <span class="chip">faster-whisper 1.2.1</span>
 </div>
-<div class="scenario-chips" id="scenario-chips"></div>
-<button class="start-btn" id="start-btn" onclick="startRace()">&#9654; Run Demo</button>
+
+<button class="start-btn" id="start-btn" onclick="startRace()">&#9654; Run concurrent simulation</button>
+
 <div class="race-row">
-  <div class="proc-card">
-    <div class="proc-header"><span class="proc-label">Stock</span><span class="proc-badge badge-idle" id="b-badge">Idle</span></div>
-    <div class="waveform" id="b-wave"></div>
-    <div class="proc-timer" id="b-timer">0.000<span class="unit">s</span></div>
-    <div class="proc-rtf" id="b-rtf">RTF <span class="rtf-val">&#8212;</span></div>
-    <div class="progress-track"><div class="progress-fill fill-stock" id="b-progress"></div></div>
+  <!-- Stock -->
+  <div class="stream-col" id="col-b">
+    <div class="col-hdr">
+      <span class="col-title">Stock</span>
+      <div style="display:flex;gap:14px;align-items:baseline;">
+        <span class="col-tally" id="tally-b"><strong>0</strong>/12 files</span>
+        <span class="col-elapsed" id="elapsed-b">0.00s</span>
+      </div>
+    </div>
+    <div id="lanes-b"></div>
+    <div class="col-footer">
+      <span class="footer-throughput" id="thr-b">—</span>
+      <span class="footer-badge badge-idle" id="badge-b">Idle</span>
+    </div>
   </div>
-  <div class="proc-card proc-card-opt">
-    <div class="proc-header"><span class="proc-label">Optimized</span><span class="proc-badge badge-idle" id="o-badge">Idle</span></div>
-    <div class="waveform" id="o-wave"></div>
-    <div class="proc-timer" id="o-timer">0.000<span class="unit">s</span></div>
-    <div class="proc-rtf" id="o-rtf">RTF <span class="rtf-val">&#8212;</span></div>
-    <div class="progress-track"><div class="progress-fill fill-opt" id="o-progress"></div></div>
+  <!-- Optimized -->
+  <div class="stream-col stream-col-opt" id="col-o">
+    <div class="col-hdr">
+      <span class="col-title">&#9889; Optimized</span>
+      <div style="display:flex;gap:14px;align-items:baseline;">
+        <span class="col-tally" id="tally-o"><strong>0</strong>/12 files</span>
+        <span class="col-elapsed col-elapsed-opt" id="elapsed-o">0.00s</span>
+      </div>
+    </div>
+    <div id="lanes-o"></div>
+    <div class="col-footer">
+      <span class="footer-throughput" id="thr-o">—</span>
+      <span class="footer-badge badge-idle" id="badge-o">Idle</span>
+    </div>
   </div>
 </div>
-<div id="transcript-panel">
-  <div class="transcript-accuracy-badge">&#10003; Both produced identical output &#xB7; WER delta &#8776; 0%</div>
-  <div class="transcript-subhead" id="transcript-subhead"></div>
-  <div class="transcript-text" id="transcript-text"></div>
+
+<!-- Results (hidden until done) -->
+<div id="results-panel">
+  <div class="scale-section">
+    <div class="section-label">What this means at scale</div>
+    <div class="scale-cards">
+      <div class="scale-card">
+        <div class="scale-lbl">Throughput improvement<br>(4-stream concurrent)</div>
+        <div class="scale-val" id="s-pct">—</div>
+        <div class="scale-arrow">
+          <span class="old" id="s-old">—</span><span>→</span><span class="new" id="s-new">—</span>
+        </div>
+        <div class="scale-sub">files / hour</div>
+      </div>
+      <div class="scale-card">
+        <div class="scale-lbl">GPU hours to process<br><span id="s-ref">1,000</span>h of audio</div>
+        <div class="scale-val" id="s-saved">—</div>
+        <div class="scale-sub" id="s-saved-sub">hours saved</div>
+      </div>
+      <div class="scale-card">
+        <div class="scale-lbl">Accuracy</div>
+        <div class="scale-val">6/6</div>
+        <div class="scale-sub">noise conditions pass</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="transcript-panel">
+    <div class="transcript-badge">&#10003; Both produce identical output &nbsp;&middot;&nbsp; WER delta &asymp; 0%</div>
+    <div class="transcript-subhead">Sample transcript · Clean long-form · 5 min studio recording</div>
+    <div class="transcript-text" id="transcript-text"></div>
+  </div>
+
+  <div id="callout"></div>
 </div>
-<div class="metrics-row" id="metrics-row" style="display:none">
-  <div class="metric-card"><div class="metric-label">RTF Improvement</div><div class="metric-value" id="m-rtf">&#8212;</div><div class="metric-sub" id="m-rtf-sub">real-time factor</div></div>
-  <div class="metric-card"><div class="metric-label">Latency Reduction</div><div class="metric-value" id="m-lat">&#8212;</div><div class="metric-sub" id="m-lat-sub">processing time</div></div>
-  <div class="metric-card"><div class="metric-label">Accuracy</div><div class="metric-value">6/6</div><div class="metric-sub">noise conditions pass</div></div>
-</div>
-<div class="callout" id="callout-note" style="display:none"></div>
+
 <script>
-var CFG=__CONFIG_JSON__;
-var clips=CFG.demo_clips,curClip=0,running=false,animId=null,ANIM_MS=7200;
-var HEIGHTS=[18,24,32,38,44,50,44,52,46,40,54,46,40,32,44,50,42,34,26,18];
-function buildWave(el){el.innerHTML='';HEIGHTS.forEach(function(h,i){var b=document.createElement('div');b.className='wbar';b.style.setProperty('--dur',(0.7+Math.random()*0.8).toFixed(2)+'s');b.style.animationDelay=(i*0.04).toFixed(2)+'s';b.style.height=h+'px';el.appendChild(b);});}
-buildWave(document.getElementById('b-wave'));
-buildWave(document.getElementById('o-wave'));
-var clipSel=document.getElementById('sel-clip');
-clips.forEach(function(c,i){var opt=document.createElement('option');opt.value=i;opt.textContent=c.label;clipSel.appendChild(opt);});
-function updateClipInfo(){
-  var c=clips[curClip];
-  var mins=Math.floor(c.audio_duration_s/60),secs=c.audio_duration_s%60;
-  var dur=mins+' min'+(secs?' '+secs+' s':'');
-  document.getElementById('clip-desc-inline').textContent='— '+c.description;
-  document.getElementById('scenario-chips').innerHTML='<span class="chip">Duration: '+dur+'</span><span class="chip">faster-whisper 1.2.1</span><span class="chip">int8_float16 · beam=5 · batch=32</span>';
-  var rtfPct=((c.baseline.rtf-c.optimized.rtf)/c.baseline.rtf*100).toFixed(1);
-  var latDelta=(c.baseline.latency_ms-c.optimized.latency_ms)/1000;
-  document.getElementById('m-rtf').textContent='−'+rtfPct+'%';
-  document.getElementById('m-rtf-sub').textContent=c.baseline.rtf.toFixed(4)+' → '+c.optimized.rtf.toFixed(4);
-  document.getElementById('m-lat').textContent='−'+latDelta.toFixed(2)+' s';
-  document.getElementById('m-lat-sub').textContent=(c.baseline.latency_ms/1000).toFixed(2)+' s → '+(c.optimized.latency_ms/1000).toFixed(2)+' s';
-  document.getElementById('b-rtf').innerHTML='RTF <span class="rtf-val">'+c.baseline.rtf.toFixed(4)+'</span>';
-  document.getElementById('o-rtf').innerHTML='RTF <span class="rtf-val">'+c.optimized.rtf.toFixed(4)+'</span>';
-  document.getElementById('transcript-subhead').textContent='Transcript — '+c.label+' · '+c.description;
-  document.getElementById('callout-note').innerHTML=CFG.callout_note.replace(/\n/g,'<br>');
-}
-function onClipChange(){curClip=parseInt(document.getElementById('sel-clip').value,10);resetUI();updateClipInfo();}
-function resetUI(){
-  if(animId)cancelAnimationFrame(animId);running=false;
-  ['b','o'].forEach(function(p){
-    document.getElementById(p+'-badge').className='proc-badge badge-idle';
-    document.getElementById(p+'-badge').textContent='Idle';
-    document.getElementById(p+'-timer').innerHTML='0.000<span class="unit">s</span>';
-    document.getElementById(p+'-progress').style.width='0%';
-    var w=document.getElementById(p+'-wave');w.classList.remove('playing','done');
-  });
-  document.getElementById('transcript-panel').style.display='none';
-  document.getElementById('metrics-row').style.display='none';
-  document.getElementById('callout-note').style.display='none';
-  document.getElementById('start-btn').disabled=false;
-  document.getElementById('start-btn').textContent='▶ Run Demo';
-}
-function startRace(){
-  if(running)return;running=true;
-  var c=clips[curClip];
-  var bTotal=c.baseline.latency_ms,oTotal=c.optimized.latency_ms;
-  var scale=ANIM_MS/Math.max(bTotal,oTotal);
-  document.getElementById('start-btn').disabled=true;
-  ['b','o'].forEach(function(p){
-    document.getElementById(p+'-badge').className='proc-badge badge-processing';
-    document.getElementById(p+'-badge').textContent='Processing…';
-    document.getElementById(p+'-wave').classList.add('playing');
-  });
-  document.getElementById('transcript-panel').style.display='none';
-  var bDone=false,oDone=false,t0=performance.now();
-  function tick(){
-    var elapsed=performance.now()-t0;
-    document.getElementById('b-timer').innerHTML=(Math.min(elapsed/scale,bTotal)/1000).toFixed(3)+'<span class="unit">s</span>';
-    document.getElementById('o-timer').innerHTML=(Math.min(elapsed/scale,oTotal)/1000).toFixed(3)+'<span class="unit">s</span>';
-    document.getElementById('b-progress').style.width=Math.min(elapsed/scale/bTotal*100,100)+'%';
-    document.getElementById('o-progress').style.width=Math.min(elapsed/scale/oTotal*100,100)+'%';
-    if(!oDone&&elapsed>=oTotal*scale){oDone=true;document.getElementById('o-badge').className='proc-badge badge-done';document.getElementById('o-badge').textContent='✓ Done';document.getElementById('o-timer').innerHTML=(oTotal/1000).toFixed(3)+'<span class="unit">s</span>';document.getElementById('o-progress').style.width='100%';var ow=document.getElementById('o-wave');ow.classList.remove('playing');ow.classList.add('done');}
-    if(!bDone&&elapsed>=bTotal*scale){bDone=true;document.getElementById('b-badge').className='proc-badge badge-done';document.getElementById('b-badge').textContent='✓ Done';document.getElementById('b-timer').innerHTML=(bTotal/1000).toFixed(3)+'<span class="unit">s</span>';document.getElementById('b-progress').style.width='100%';var bw=document.getElementById('b-wave');bw.classList.remove('playing');bw.classList.add('done');}
-    if(bDone&&oDone){document.getElementById('transcript-text').textContent=c.transcript;document.getElementById('transcript-panel').style.display='block';document.getElementById('metrics-row').style.display='grid';document.getElementById('callout-note').style.display='flex';running=false;document.getElementById('start-btn').disabled=false;document.getElementById('start-btn').textContent='↺ Run again';return;}
-    animId=requestAnimationFrame(tick);
+var CFG = __CONFIG_JSON__;
+var cd  = CFG.concurrent_demo;
+var ANIM_MS = 9000;
+var running = false, animId = null;
+
+// ── Compute animation params ──────────────────────────────────────────────────
+var rtfB = cd.baseline.rtf_per_stream;   // 0.0096
+var rtfO = cd.optimized.rtf_per_stream;  // 0.0073
+var nStreams = cd.num_streams;            // 4
+var nFiles   = cd.files_per_stream;      // 3
+var fileDur  = cd.file_duration_s;       // 300s
+
+var perFileRealB  = fileDur * rtfB * 1000;           // ms per file baseline
+var perFileRealO  = fileDur * rtfO * 1000;           // ms per file optimized
+var totalRealB    = nFiles * perFileRealB;            // total baseline ms
+var totalRealO    = nFiles * perFileRealO;            // total optimized ms
+var scale         = ANIM_MS / totalRealB;
+var perFileAnimB  = perFileRealB * scale;
+var perFileAnimO  = perFileRealO * scale;
+var totalAnimB    = ANIM_MS;
+var totalAnimO    = totalRealO * scale;
+
+// ── Scenario chip ─────────────────────────────────────────────────────────────
+document.getElementById('chip-scenario').textContent =
+  nStreams + ' parallel streams · ' + nFiles + ' files each · ' +
+  Math.floor(fileDur/60) + '-min audio';
+
+// ── Build lane rows ───────────────────────────────────────────────────────────
+function buildLanes(containerId, isOpt) {
+  var el = document.getElementById(containerId);
+  el.innerHTML = '';
+  var fillCls = isOpt ? 'lane-bar-fill lane-bar-fill-opt' : 'lane-bar-fill';
+  for (var s = 0; s < nStreams; s++) {
+    var div = document.createElement('div');
+    div.className = 'stream-lane';
+    div.innerHTML =
+      '<div class="lane-hdr">' +
+        '<span class="lane-label">Stream ' + (s+1) + '</span>' +
+        '<span class="lane-files" id="' + containerId + '-fc-' + s + '"><strong>0</strong>/' + nFiles + ' files</span>' +
+      '</div>' +
+      '<div class="lane-filename" id="' + containerId + '-fn-' + s + '">—</div>' +
+      '<div class="lane-bar-wrap">' +
+        '<div class="' + fillCls + '" id="' + containerId + '-bar-' + s + '"></div>' +
+      '</div>';
+    el.appendChild(div);
   }
-  animId=requestAnimationFrame(tick);
 }
-updateClipInfo();
+
+// ── Update one side during animation ─────────────────────────────────────────
+function updateSide(cid, elapsed, perFileAnim, isOpt) {
+  var totalDone = 0;
+  var realPerFile = (isOpt ? perFileRealO : perFileRealB) / 1000; // seconds
+
+  for (var s = 0; s < nStreams; s++) {
+    var files  = cd.stream_files[s];
+    var barEl  = document.getElementById(cid + '-bar-' + s);
+    var fnEl   = document.getElementById(cid + '-fn-' + s);
+    var fcEl   = document.getElementById(cid + '-fc-' + s);
+
+    // Which file in this stream are we on?
+    var fileIdx = Math.min(Math.floor(elapsed / perFileAnim), nFiles - 1);
+    var posInFile = elapsed - fileIdx * perFileAnim;
+    var pct = Math.min(posInFile / perFileAnim * 100, 100);
+
+    // Completed files for this stream
+    var done = Math.floor(elapsed / perFileAnim);
+    if (elapsed >= nFiles * perFileAnim) done = nFiles;
+    totalDone += done;
+
+    fcEl.innerHTML = '<strong>' + done + '</strong>/' + nFiles + ' files';
+
+    if (done >= nFiles) {
+      barEl.style.width = '100%';
+      fnEl.textContent  = '✓ All done';
+      fnEl.className    = 'lane-filename active';
+    } else {
+      barEl.style.width = pct + '%';
+      fnEl.textContent  = files[fileIdx] || '—';
+      fnEl.className    = done > 0 || pct > 0 ? 'lane-filename active' : 'lane-filename';
+    }
+  }
+
+  // Tally
+  var tallyEl = document.getElementById('tally-' + (isOpt ? 'o' : 'b'));
+  var totalFiles = nStreams * nFiles;
+  tallyEl.innerHTML = '<strong>' + totalDone + '</strong>/' + totalFiles + ' files';
+
+  // Elapsed
+  var realElapsed = Math.min(elapsed / scale, isOpt ? totalRealO : totalRealB) / 1000;
+  document.getElementById('elapsed-' + (isOpt ? 'o' : 'b')).textContent =
+    realElapsed.toFixed(2) + 's';
+
+  // Throughput footer (files/hour real-time estimate)
+  var thrEl = document.getElementById('thr-' + (isOpt ? 'o' : 'b'));
+  if (totalDone > 0 && realElapsed > 0) {
+    var filesPerHr = Math.round(totalDone / realElapsed * 3600);
+    thrEl.innerHTML = '<strong>' + filesPerHr.toLocaleString() + '</strong> files/hr (live)';
+  }
+}
+
+// ── Race ──────────────────────────────────────────────────────────────────────
+function startRace() {
+  if (running) return;
+  running = true;
+
+  document.getElementById('start-btn').disabled = true;
+  document.getElementById('results-panel').style.display = 'none';
+
+  // Reset displays
+  ['b','o'].forEach(function(s) {
+    document.getElementById('badge-' + s).className = 'footer-badge badge-running';
+    document.getElementById('badge-' + s).textContent = 'Running…';
+    document.getElementById('thr-' + s).innerHTML = '—';
+  });
+
+  var t0 = performance.now();
+  var bDone = false, oDone = false;
+
+  function tick() {
+    var elapsed = performance.now() - t0;
+
+    if (!bDone) updateSide('lanes-b', elapsed, perFileAnimB, false);
+    if (!oDone) updateSide('lanes-o', elapsed, perFileAnimO, true);
+
+    if (!oDone && elapsed >= totalAnimO) {
+      oDone = true;
+      updateSide('lanes-o', totalAnimO, perFileAnimO, true);
+      document.getElementById('elapsed-o').textContent = (totalRealO/1000).toFixed(2) + 's';
+      document.getElementById('badge-o').className = 'footer-badge badge-done';
+      document.getElementById('badge-o').textContent = '✓ Done';
+      document.getElementById('thr-o').innerHTML =
+        '<strong>' + cd.optimized.files_per_hour.toLocaleString() + '</strong> files/hr';
+    }
+    if (!bDone && elapsed >= totalAnimB) {
+      bDone = true;
+      updateSide('lanes-b', totalAnimB, perFileAnimB, false);
+      document.getElementById('elapsed-b').textContent = (totalRealB/1000).toFixed(2) + 's';
+      document.getElementById('badge-b').className = 'footer-badge badge-done';
+      document.getElementById('badge-b').textContent = '✓ Done';
+      document.getElementById('thr-b').innerHTML =
+        '<strong>' + cd.baseline.files_per_hour.toLocaleString() + '</strong> files/hr';
+    }
+
+    if (bDone && oDone) {
+      showResults();
+      return;
+    }
+    animId = requestAnimationFrame(tick);
+  }
+  animId = requestAnimationFrame(tick);
+}
+
+// ── Show results ──────────────────────────────────────────────────────────────
+function showResults() {
+  running = false;
+  document.getElementById('start-btn').disabled    = false;
+  document.getElementById('start-btn').textContent = '↺ Run again';
+
+  // Scale stats
+  var fphB  = cd.baseline.files_per_hour;    // 5000
+  var fphO  = cd.optimized.files_per_hour;   // 6575
+  var pct   = cd.improvement_pct;            // 31.5
+  var ref   = cd.scale_reference_audio_hours; // 1000
+
+  // ref audio-hours → how many 5-min files? ref*60/fileDur
+  var refFiles = ref * 60 * 60 / fileDur;    // 1000*3600/300 = 12000 files
+  var gpuHrsB  = (refFiles / fphB).toFixed(1);  // 2.4h
+  var gpuHrsO  = (refFiles / fphO).toFixed(1);  // 1.8h
+  var saved    = ((refFiles / fphB) - (refFiles / fphO)).toFixed(1);
+
+  document.getElementById('s-ref').textContent    = ref.toLocaleString() + 'h';
+  document.getElementById('s-pct').textContent    = '+' + pct + '%';
+  document.getElementById('s-old').textContent    = fphB.toLocaleString() + '/hr';
+  document.getElementById('s-new').textContent    = fphO.toLocaleString() + '/hr';
+  document.getElementById('s-saved').textContent  = '−' + saved + 'h';
+  document.getElementById('s-saved-sub').textContent = gpuHrsB + 'h → ' + gpuHrsO + 'h GPU time';
+
+  // Transcript
+  var clip = CFG.demo_clips[0];
+  document.getElementById('transcript-text').textContent = clip.transcript;
+
+  // Callout
+  document.getElementById('callout').innerHTML =
+    CFG.callout_note.replace(/\n/g, '<br>');
+
+  document.getElementById('results-panel').style.display = 'block';
+}
+
+// ── Reset ─────────────────────────────────────────────────────────────────────
+function resetUI() {
+  if (animId) cancelAnimationFrame(animId);
+  running = false;
+  buildLanes('lanes-b', false);
+  buildLanes('lanes-o', true);
+  ['b','o'].forEach(function(s) {
+    document.getElementById('tally-' + s).innerHTML = '<strong>0</strong>/' + (nStreams*nFiles) + ' files';
+    document.getElementById('elapsed-' + s).textContent = '0.00s';
+    document.getElementById('thr-' + s).innerHTML = '—';
+    document.getElementById('badge-' + s).className = 'footer-badge badge-idle';
+    document.getElementById('badge-' + s).textContent = 'Idle';
+  });
+  document.getElementById('results-panel').style.display = 'none';
+  document.getElementById('start-btn').disabled    = false;
+  document.getElementById('start-btn').textContent = '▶ Run concurrent simulation';
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+buildLanes('lanes-b', false);
+buildLanes('lanes-o', true);
 </script>
 </body></html>"""
 
@@ -223,8 +440,6 @@ def render_asr_demo():
         st.error(f"Config not found: {_ASR_CFG_ID}")
         st.stop()
 
-    tt_src  = "data:image/svg+xml;base64," + base64.b64encode(
-        (_LOGOS_DIR / "TurinTech-light-no Background.svg").read_bytes()).decode()
     art_src = "data:image/png;base64," + base64.b64encode(
         (_LOGOS_DIR / "artemis-logo-wordmark.png").read_bytes()).decode()
 
@@ -237,13 +452,12 @@ def render_asr_demo():
 
     html = (
         _ASR_HTML
-        .replace("__CONFIG_JSON__",    json.dumps(cfg))
-        .replace("__TURINTECH_LOGO__", tt_src)
-        .replace("__ARTEMIS_LOGO__",   art_src)
-        .replace("__HACK_REGULAR__",   hack_r)
-        .replace("__HACK_BOLD__",      hack_b)
+        .replace("__CONFIG_JSON__",  json.dumps(cfg))
+        .replace("__ARTEMIS_LOGO__", art_src)
+        .replace("__HACK_REGULAR__", hack_r)
+        .replace("__HACK_BOLD__",    hack_b)
     )
-    st.components.v1.html(html, height=1060, scrolling=False)
+    st.components.v1.html(html, height=980, scrolling=False)
 
 
 render_asr_demo()
