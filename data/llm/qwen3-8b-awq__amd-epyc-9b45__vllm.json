@@ -173,6 +173,7 @@
   },
   "bench_serve": {
     "description": "vllm bench serve ABBA · 100 prompts × 512in/512out · max-concurrency 32 · request-rate inf",
+    "load_context": "32 concurrent requests · server under load",
     "ttft_ms": { "baseline": 65267, "optimized": 34314 }
   },
   "cross_hardware": [

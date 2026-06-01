@@ -1,0 +1,197 @@
+{
+  "meta": {
+    "config_id": "llama-3.1-8b-q4km__intel-xeon-8581c__llama-cpp",
+    "model": "Llama-3.1-8B Q4_K_M",
+    "framework": "llama.cpp",
+    "hardware": "Intel Xeon 8581C Sapphire Rapids",
+    "hardware_class": "Datacenter CPU",
+    "hardware_specs": {
+      "cores": 96,
+      "ram_gb": 188,
+      "bandwidth_gbs": 460,
+      "tdp_w": 350,
+      "spec_tier": "high"
+    }
+  },
+  "services": {
+    "baseline_url": null,
+    "optimized_url": null,
+    "model_id": "Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf"
+  },
+  "demo_prompts": [
+    {
+      "label": "Technical explanation",
+      "system": "",
+      "user": "What are the key differences between HTTP/1.1 and HTTP/2, and what performance improvements does HTTP/2 provide?",
+      "why": "Large prompt — TTFT 162ms → 145ms (−10.5%). Prompt processing: 160.7 → 180.4 t/s. Decode: 15.3 → 16.2 tok/s.",
+      "recorded": {
+        "baseline": {
+          "ttft_ms": 162,
+          "total_ms": 8000,
+          "tps": 15.3,
+          "text": "HTTP/1.1 vs HTTP/2: Key Differences\nHTTP/1.1 and HTTP/2 are two versions of the Hypertext Transfer Protocol (HTTP) used for transferring data over the web. The main differences between them are:\n1. Multiplexing\nHTTP/1.1: Each request is sent over a separate connection, resulting in a sequential processing of requests.\nHTTP/2: Multiple requests are sent over a single connection, allowing for concurrent processing of requests.\n2. Header Compression\nHTTP/1.1: Headers are sent in plain text, resulting in a significant amount of overhead.\nHTTP/2: Headers are compressed using HPACK, reducing the overhead and improving data transfer efficiency."
+        },
+        "optimized": {
+          "ttft_ms": 145,
+          "total_ms": 7250,
+          "tps": 16.2,
+          "text": "HTTP/1.1 vs HTTP/2: Key Differences\nHTTP/1.1 and HTTP/2 are two versions of the Hypertext Transfer Protocol (HTTP) used for transferring data over the web. The main differences between them are:\n1. Multiplexing\nHTTP/1.1: Each request is sent over a separate connection, resulting in a high number of connections and overhead.\nHTTP/2: Multiple requests are sent over a single connection, reducing the overhead and improving performance.\n2. Header Compression\nHTTP/1.1: Headers are sent in plain text, resulting in a large amount of overhead.\nHTTP/2: Headers are compressed using HPACK, which significantly reduces header overhead and speeds up data transfer."
+        }
+      }
+    },
+    {
+      "label": "Code generation",
+      "system": "",
+      "user": "Write a Python function that implements binary search with error handling and type hints.",
+      "why": "Code generation — TTFT 130ms → 118ms (−9.2%). Decode throughput: 15.7 → 17.8 tok/s (+13.4%).",
+      "recorded": {
+        "baseline": {
+          "ttft_ms": 130,
+          "total_ms": 10000,
+          "tps": 15.7,
+          "text": "Binary Search Function\nThe following Python function implements binary search with error handling and type hints.\n```python\ndef binary_search(arr: list[int], target: int) -> int | None:\n    \"\"\"\n    Searches for a target value in a sorted array using binary search.\n    Args:\n    arr (list[int]): A sorted list of integers.\n    target (int): The value to search for.\n    Returns:\n    int | None: The index of the target value if found, otherwise None.\n    \"\"\"\n    if not isinstance(arr, list) or not all(isinstance(x, int) for x in arr):\n        raise TypeError(\"Array must be a list of integers.\")\n    if not isinstance(target, int):\n        raise TypeError\n```"
+        },
+        "optimized": {
+          "ttft_ms": 118,
+          "total_ms": 8830,
+          "tps": 17.8,
+          "text": "Binary Search Function\nHere's a Python implementation with type hints and input validation:\n```python\ndef binary_search(arr: list[int], target: int) -> int | None:\n    \"\"\"\n    Search a sorted list for a value using binary search.\n\n    Args:\n        arr (list[int]): A sorted list of integers.\n        target (int): The value to find.\n\n    Returns:\n        int | None: The index of the target if found, else None.\n    \"\"\"\n    if not isinstance(arr, list) or not all(isinstance(x, int) for x in arr):\n        raise TypeError(\"arr must be a list of integers.\")\n    if not isinstance(target, int):\n        raise TypeError\n```"
+        }
+      }
+    }
+  ],
+  "benchmark": {
+    "description_note": "Sequential phase: 50 runs per scenario (+20 warmup), single-request, no contention. P50/P95 latency. Hardware: Intel Xeon Platinum 8581C, 96 cores (2×48 NUMA), GCP c4-highcpu-96, 188 GB RAM, ~460 GB/s bandwidth. llama.cpp (May 2025, commit c2de5dfa), 4 parallel slots, 64 threads, ctx 32768, --no-cache-prompt. Baseline: AVX2-only (-DGGML_AVX512=OFF). Optimised: AVX-512 VNNI + barrier memory ordering improvement (seq_cst → acq_rel).",
+    "scenarios": {
+      "small_prompt": {
+        "label": "Small Prompt",
+        "description": "Short query (~5 in / ~40 out) — measures TTFT and decode latency",
+        "sequential": {
+          "throughput_tps": { "baseline": 15.3, "optimized": 16.2 },
+          "ttft_ms":        { "baseline": 180,  "optimized": 176  },
+          "p95_ms":         { "baseline": 182,  "optimized": 179  },
+          "p99_ms":         { "baseline": 184,  "optimized": 184  },
+          "variance_cv":    { "baseline": 0.73, "optimized": 1.13 }
+        },
+        "concurrent": {
+          "throughput_tps": { "baseline": 15.3, "optimized": 16.2 },
+          "ttft_ms":        { "baseline": 181,  "optimized": 177  },
+          "p95_ms":         { "baseline": 181,  "optimized": 177  },
+          "p99_ms":         { "baseline": 181,  "optimized": 177  },
+          "variance_cv":    { "baseline": 0.20, "optimized": 0.42 }
+        }
+      },
+      "large_prompt": {
+        "label": "Large Prompt",
+        "description": "Long input (~1500 tokens in / ~75 out) — stresses prefill throughput",
+        "sequential": {
+          "throughput_tps": { "baseline": 15.3,  "optimized": 16.2  },
+          "ttft_ms":        { "baseline": 2175,  "optimized": 2144  },
+          "p95_ms":         { "baseline": 2496,  "optimized": 2238  },
+          "p99_ms":         { "baseline": 2515,  "optimized": 2267  },
+          "variance_cv":    { "baseline": 5.03,  "optimized": 2.45  }
+        },
+        "concurrent": {
+          "throughput_tps": { "baseline": 0.52,   "optimized": 0.64   },
+          "ttft_ms":        { "baseline": null,   "optimized": null   },
+          "p95_ms":         { "baseline": 14688,  "optimized": 12855  },
+          "p99_ms":         { "baseline": 15249,  "optimized": 13746  },
+          "variance_cv":    { "baseline": 21.60,  "optimized": 21.81  }
+        }
+      },
+      "long_context": {
+        "label": "Long Context",
+        "description": "~6500-token context window — prefill is the dominant cost; biggest concurrent latency win",
+        "sequential": {
+          "throughput_tps": { "baseline": 15.3, "optimized": 16.2 },
+          "ttft_ms":        { "baseline": 838,  "optimized": 823  },
+          "p95_ms":         { "baseline": 842,  "optimized": 848  },
+          "p99_ms":         { "baseline": 851,  "optimized": 881  },
+          "variance_cv":    { "baseline": 0.33, "optimized": 1.52 }
+        },
+        "concurrent": {
+          "throughput_tps": { "baseline": 0.23,   "optimized": 0.31   },
+          "ttft_ms":        { "baseline": null,   "optimized": null   },
+          "p95_ms":         { "baseline": 21516,  "optimized": 17502  },
+          "p99_ms":         { "baseline": 21903,  "optimized": 17827  },
+          "variance_cv":    { "baseline": 16.93,  "optimized": 14.81  }
+        }
+      },
+      "control_prompt": {
+        "label": "Control Prompt",
+        "description": "Repeated identical prompt — output must be bit-identical across all runs (determinism check)",
+        "sequential": {
+          "throughput_tps": { "baseline": 15.3, "optimized": 16.2 },
+          "ttft_ms":        { "baseline": 31,   "optimized": 32   },
+          "p95_ms":         { "baseline": 32,   "optimized": 32   },
+          "p99_ms":         { "baseline": 32,   "optimized": 32   },
+          "variance_cv":    { "baseline": 0.94, "optimized": 0.66 }
+        },
+        "concurrent": {
+          "throughput_tps": { "baseline": 15.3, "optimized": 16.2 },
+          "ttft_ms":        { "baseline": 26,   "optimized": 25   },
+          "p95_ms":         { "baseline": 26,   "optimized": 26   },
+          "p99_ms":         { "baseline": 27,   "optimized": 26   },
+          "variance_cv":    { "baseline": 0.67, "optimized": 1.23 }
+        }
+      }
+    }
+  },
+  "correctness": {
+    "validations": [
+      {
+        "name": "Sanity Checks",
+        "description": "Non-empty outputs, complete generations, no truncation",
+        "pass": true,
+        "note": "PASS on all 4 scenarios — both baseline and candidate produced complete, non-empty responses"
+      },
+      {
+        "name": "Structural Validation",
+        "description": "JSON / code format integrity preserved",
+        "pass": true,
+        "note": "PASS on all applicable scenarios"
+      },
+      {
+        "name": "Semantic Similarity",
+        "description": "Embedding-based drift detection (cosine ≥ 0.92 threshold, all-MiniLM-L6-v2)",
+        "pass": true,
+        "note": "PASS on all 3 non-control scenarios — cosine similarity ≥ 0.92 across all May 04 runs"
+      },
+      {
+        "name": "Exact Match",
+        "description": "Deterministic control prompts must reproduce identical output",
+        "pass": true,
+        "note": "PASS — control_prompt_v1: 50/50, small_prompt_v1: 50/50"
+      }
+    ],
+    "accuracy": {
+      "mmlu":        { "baseline": null,   "optimized": null,   "unit": "acc" },
+      "hellaswag":   { "baseline": null,   "optimized": null,   "unit": "acc_norm" },
+      "perplexity":  { "baseline": 8.4042, "optimized": 8.3973, "unit": "ppl (WikiText-2, 20 chunks, n_ctx=512)" },
+      "cost_per_1m": { "baseline": null,   "optimized": null,   "unit": "$" }
+    }
+  },
+  "bench_serve": {
+    "description": "Artemis concurrent · 4 parallel slots · no-cache-prompt. Throughput: large_prompt_v1 (~1500 tokens). P95 latency: long_context_v1 (~6500 tokens).",
+    "latency_label": "P95 Latency (Concurrent)",
+    "tps": { "baseline": 39, "optimized": 48 },
+    "slots": 4,
+    "load_context": "4 concurrent requests · server under load",
+    "ttft_ms": { "baseline": 21516, "optimized": 17502 }
+  },
+  "callout_note": "Llama-3.1-8B Q4_K_M · llama.cpp · Intel Xeon 8581C Sapphire Rapids.\nThroughput (+23.1%) and P95 latency (−18.7%) measured under concurrent load · Artemis benchmark · 4 parallel slots.\nQuality validated: perplexity 8.4042 → 8.3973 on WikiText-2 (within noise) · semantic similarity ≥ 0.92 · all-MiniLM-L6-v2 · 50 runs per scenario",
+  "cross_hardware": [
+    {
+      "model": "Llama-3.1-8B Q4_K_M",
+      "class": "Datacenter CPU",
+      "hardware": "Intel Xeon 8581C Sapphire Rapids",
+      "spec_tier": "high",
+      "framework": "llama.cpp",
+      "optimization": "AVX-512 VNNI + barrier memory ordering (seq_cst → acq_rel)",
+      "throughput_delta_pct": 13.4,
+      "accuracy_delta": 0.0,
+      "verdict": "pass",
+      "config_id": "llama-3.1-8b-q4km__intel-xeon-8581c__llama-cpp"
+    }
+  ]
+}
