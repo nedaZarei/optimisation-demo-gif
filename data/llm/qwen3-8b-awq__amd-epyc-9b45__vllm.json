@@ -35,7 +35,7 @@
           "ttft_ms": 150,
           "total_ms": 2657,
           "tps": 62.64,
-          "text": "<think>\nThe user wants to know Japan's capital. That's straightforward — it's Tokyo, which became the capital in 1869 when Emperor Meiji moved the imperial seat from Kyoto. Tokyo remains the capital today.\n</think>\n\nJapan's capital is **Tokyo**. It has served as the seat of government since 1869, when Emperor Meiji relocated the imperial court from Kyoto."
+          "text": "<think>\nThe user wants to know Japan's capital. That's straightforward — it's Tokyo, which became the capital in 1869 when Emperor Meiji moved the imperial seat from Kyoto. Tokyo remains the capital today.\n</think>\n\nJapan's capital is **Tokyo**."
         }
       }
     },
