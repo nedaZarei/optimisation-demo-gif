@@ -363,6 +363,17 @@ body {
 .co-headline { font-size: 1.1rem; font-weight: 800; color: var(--color-slate-100); line-height: 1.3; margin-bottom: 8px; }
 .co-note { font-size: .7rem; color: var(--color-slate-600); line-height: 1.6; white-space: pre-line; }
 .sb-load { font-size: .72rem; color: var(--color-slate-500); font-style: italic; }
+
+.thr-gauge-wrap { margin: 16px 0 6px; }
+.thr-gauge-track { background: var(--color-slate-800); border-radius: var(--r-full); height: 18px; overflow: hidden; margin-bottom: 5px; }
+.thr-gauge-fill { height: 100%; width: 0%; border-radius: var(--r-full); background: var(--color-slate-600); }
+.thr-gauge-fill-opt { background: var(--color-success); }
+.thr-scale-row { display: flex; justify-content: space-between; font-size: .62rem; color: var(--color-slate-700); font-family: var(--font-mono); margin-bottom: 16px; }
+.thr-num-row { display: flex; align-items: baseline; gap: 7px; margin-bottom: 4px; }
+.thr-big-num { font-family: var(--font-mono); font-size: 2.8rem; font-weight: 700; color: var(--color-slate-200); letter-spacing: -2px; line-height: 1; }
+.thr-big-num-opt { color: var(--color-success); }
+.thr-unit { font-size: .8rem; color: var(--color-slate-500); font-family: var(--font-mono); }
+.thr-desc { font-size: .71rem; color: var(--color-slate-600); }
 </style>
 </head>
 <body>
@@ -417,6 +428,49 @@ body {
     <div class="card-footer card-footer-opt" id="foot-a" style="display:none">
       <span>TTFT <strong id="ttft-a">—</strong></span>
       <span id="tps-span-a">tok/s <strong id="tps-a">—</strong></span>
+    </div>
+  </div>
+</div>
+
+<div id="throughput-view" style="display:none">
+  <div class="cards-row">
+    <div class="card">
+      <div class="card-hdr">
+        <span class="card-title">Baseline</span>
+        <span class="badge" id="thr-done-b" style="display:none">Done</span>
+      </div>
+      <div class="thr-gauge-wrap">
+        <div class="thr-gauge-track"><div class="thr-gauge-fill" id="thr-fill-b"></div></div>
+        <div class="thr-scale-row"><span>0</span><span>30</span><span>60</span><span>90 tok/s</span></div>
+      </div>
+      <div class="thr-num-row">
+        <span class="thr-big-num" id="thr-num-b">—</span>
+        <span class="thr-unit">tok / s</span>
+      </div>
+      <div class="thr-desc">output throughput · 32 concurrent requests</div>
+      <div class="card-footer" id="thr-foot-b" style="display:none">
+        <span>TPOT <strong id="thr-tpot-b">—</strong></span>
+        <span style="color:var(--color-slate-600)">per-token decode latency</span>
+      </div>
+    </div>
+    <div class="card card-opt">
+      <div class="card-hdr">
+        <span class="card-title">&#9889; Artemis-optimized</span>
+        <span class="badge badge-opt" id="thr-done-o" style="display:none">Done</span>
+      </div>
+      <div class="thr-gauge-wrap">
+        <div class="thr-gauge-track"><div class="thr-gauge-fill thr-gauge-fill-opt" id="thr-fill-o"></div></div>
+        <div class="thr-scale-row"><span>0</span><span>30</span><span>60</span><span>90 tok/s</span></div>
+      </div>
+      <div class="thr-num-row">
+        <span class="thr-big-num thr-big-num-opt" id="thr-num-o">—</span>
+        <span class="thr-unit">tok / s</span>
+      </div>
+      <div class="thr-desc">output throughput · 32 concurrent requests</div>
+      <div class="card-footer card-footer-opt" id="thr-foot-o" style="display:none">
+        <span>TPOT <strong id="thr-tpot-o">—</strong></span>
+        <span style="color:var(--color-slate-600)">per-token decode latency</span>
+      </div>
     </div>
   </div>
 </div>
@@ -530,8 +584,10 @@ function loadCfg(idx) {
     renderConcurrentView(cd);
   } else {
     var ps = document.getElementById('prompt-sel'); ps.innerHTML = '';
+    if (ALL[idx].throughput_demo) { addOpt(ps, 'throughput', ALL[idx].throughput_demo.label); }
     ALL[idx].demo_prompts.forEach(function(p, i) { addOpt(ps, i, p.label); });
-    curPrompt = 0; updatePromptBox();
+    curPrompt = ALL[idx].throughput_demo ? 'throughput' : 0;
+    updatePromptView();
   }
   // load context label in spec-bar
   var lcEl = document.getElementById('sb-load');
@@ -542,8 +598,24 @@ function loadCfg(idx) {
   resetCards();
   document.querySelectorAll('#metrics .mc-lbl')[1].textContent = 'Time to First Token';
 }
-function onPromptChange(v) { curPrompt = parseInt(v); updatePromptBox(); resetCards(); }
+function onPromptChange(v) {
+  curPrompt = (v === 'throughput') ? 'throughput' : parseInt(v);
+  updatePromptView();
+  resetCards();
+}
+function updatePromptView() {
+  var isThr = (curPrompt === 'throughput');
+  document.getElementById('throughput-view').style.display = isThr ? '' : 'none';
+  document.getElementById('race-view').style.display       = isThr ? 'none' : '';
+  if (isThr) {
+    var td = ALL[curCfg].throughput_demo;
+    document.getElementById('prompt-box').textContent = td ? td.scenario : '';
+  } else {
+    updatePromptBox();
+  }
+}
 function updatePromptBox() {
+  if (curPrompt === 'throughput') return;
   var p = ALL[curCfg].demo_prompts[curPrompt];
   var txt = p.user || '';
   if (txt.length > 200) txt = txt.slice(0, 200) + '…';
@@ -554,10 +626,16 @@ function resetCards() {
   bDone = false; aDone = false;
   document.getElementById('metrics').classList.remove('show');
   document.getElementById('callout').classList.remove('show');
-  if (ALL[curCfg] && ALL[curCfg].concurrent_demo) {
-    resetConcurrentLanes();
+  // always reset throughput view
+  var thrFb = document.getElementById('thr-fill-b');
+  if (thrFb) {
+    thrFb.style.width = '0%'; document.getElementById('thr-fill-o').style.width = '0%';
+    setText('thr-num-b', '—'); setText('thr-num-o', '—');
+    hide('thr-done-b'); hide('thr-done-o'); hide('thr-foot-b'); hide('thr-foot-o');
+  }
+  if (curPrompt === 'throughput') {
     var btn = document.getElementById('run-btn');
-    btn.disabled = false; btn.innerHTML = '&#9654; Run simulation'; return;
+    btn.disabled = false; btn.innerHTML = '&#9654; Compare'; return;
   }
   var ph = '<span class="placeholder">Select a prompt and click Compare</span>';
   setHtml('text-b', ph); setHtml('text-a', ph);
@@ -570,7 +648,36 @@ function resetCards() {
 
 function startRace() {
   if (ALL[curCfg].concurrent_demo) { startConcurrentRace(); return; }
+  if (curPrompt === 'throughput') { startThroughputRace(); return; }
   startSequentialRace();
+}
+function startThroughputRace() {
+  resetCards();
+  var btn = document.getElementById('run-btn');
+  btn.disabled = true; btn.textContent = '⏳ Running…';
+  var td = ALL[curCfg].throughput_demo;
+  var bTps = td.baseline_tps, aTps = td.optimized_tps;
+  var scaleMax = td.scale_max_tps || 90;
+  var ANIM_MS = 7000;
+  t0 = null;
+  function tick(ts) {
+    if (!t0) t0 = ts;
+    var el = Math.min(ts - t0, ANIM_MS);
+    var raw = el / ANIM_MS;
+    var eased = 1 - Math.pow(1 - raw, 3); // ease-out cubic
+    var curB = bTps * eased, curA = aTps * eased;
+    document.getElementById('thr-fill-b').style.width = (curB / scaleMax * 100) + '%';
+    document.getElementById('thr-fill-o').style.width = (curA / scaleMax * 100) + '%';
+    setText('thr-num-b', curB.toFixed(1));
+    setText('thr-num-o', curA.toFixed(1));
+    if (el < ANIM_MS) { raf = requestAnimationFrame(tick); return; }
+    setText('thr-num-b', bTps.toFixed(2)); setText('thr-num-o', aTps.toFixed(2));
+    show('thr-done-b'); show('thr-done-o');
+    setText('thr-tpot-b', td.baseline_tpot_ms+' ms'); setText('thr-tpot-o', td.optimized_tpot_ms+' ms');
+    show('thr-foot-b'); show('thr-foot-o');
+    finish(0, 0, bTps, aTps, ANIM_MS/1000, ANIM_MS/1000);
+  }
+  raf = requestAnimationFrame(tick);
 }
 function startSequentialRace() {
   resetCards();
@@ -653,7 +760,7 @@ function startSequentialRace() {
 function finish(bTtft,aTtft,bTps,aTps,bEnd,aEnd) {
   var btn = document.getElementById('run-btn');
   btn.disabled = false;
-  btn.textContent = ALL[curCfg].concurrent_demo ? '↺ Run again' : '↺ Compare again';
+  btn.textContent = (curPrompt === 'throughput') ? '↺ Run again' : '↺ Compare again';
   var bs = ALL[curCfg].bench_serve;
   var mBTps = bTps;   // already per-slot for llama.cpp, per-request for vLLM
   var mATps = aTps;
