@@ -1,0 +1,85 @@
+{
+  "meta": {
+    "config_id": "qwen3-4b-awq__intel-xeon-8581c__vllm",
+    "model": "Qwen3-4B AWQ",
+    "framework": "vLLM v0.19.2rc0",
+    "hardware": "Intel Xeon 8581C Emerald Rapids",
+    "hardware_class": "Datacenter CPU",
+    "hardware_specs": {
+      "cores": 96,
+      "ram_gb": 180,
+      "bandwidth_gbs": 700,
+      "tdp_w": 350,
+      "spec_tier": "high"
+    }
+  },
+  "services": {
+    "baseline_url": null,
+    "optimized_url": null,
+    "model_id": "Qwen/Qwen3-4B-AWQ"
+  },
+  "demo_prompts": [],
+  "throughput_demo": {
+    "label": "Throughput benchmark · 32 concurrent requests · TP=2",
+    "scenario": "vllm benchmark_serving.py · decode-heavy · 128 in / 2048 out · max-concurrency 32 · TP=2 · AMX dequant kernel + torch.topk sampler",
+    "baseline_tps": 380.2,
+    "optimized_tps": 517.1,
+    "scale_max_tps": 650,
+    "baseline_tpot_ms": 84,
+    "optimized_tpot_ms": 62
+  },
+  "bench_serve": {
+    "description": "vllm benchmark_serving.py · decode-heavy · 128in/2048out · max-concurrency 32 · TP=2 · request-rate inf",
+    "load_context": "32 concurrent requests · TP=2 · server under load",
+    "tps": { "baseline": 380.2, "optimized": 517.1 }
+  },
+  "benchmark": {
+    "description_note": "vLLM benchmark_serving.py (not Artemis LLM Bench). 1 run × 100 prompts per model. 512in/512out tokens, max-concurrency 32, TP=2, GCP c4-highcpu-96. Intel Xeon 8581C Emerald Rapids, 96 vCPUs, ~180 GB RAM, AMX-bf16 + AMX-int8 + AVX-512. Baseline: vLLM v0.19.2rc0 stock CPU. Optimised: same + AMX dequant kernel (int4→bf16 tile fuse) + torch.topk sampler (O(V log k) vs O(V log V)).",
+    "sweep_results": [
+      { "group": "Qwen3-AWQ",   "model": "Qwen3-4B-AWQ",           "size_b": 4,  "baseline_tps": 428.3, "patched_tps": 561.5, "delta_pct": 31.1 },
+      { "group": "Qwen3-AWQ",   "model": "Qwen3-8B-AWQ",           "size_b": 8,  "baseline_tps": 322.1, "patched_tps": 398.4, "delta_pct": 23.7 },
+      { "group": "Qwen3-AWQ",   "model": "Qwen3-14B-AWQ",          "size_b": 14, "baseline_tps": 179.8, "patched_tps": 201.5, "delta_pct": 12.1 },
+      { "group": "Qwen3-BF16",  "model": "Qwen3-4B-BF16",          "size_b": 4,  "baseline_tps": 337.0, "patched_tps": 410.8, "delta_pct": 21.9 },
+      { "group": "Qwen3-BF16",  "model": "Qwen3-8B-BF16",          "size_b": 8,  "baseline_tps": 236.6, "patched_tps": 273.1, "delta_pct": 15.4 },
+      { "group": "Qwen3-BF16",  "model": "Qwen3-14B-BF16",         "size_b": 14, "baseline_tps": 129.7, "patched_tps": 140.5, "delta_pct": 8.4  },
+      { "group": "W4A16-sweep", "model": "Llama-3.1-8B-W4A16",     "size_b": 8,  "baseline_tps": 281.2, "patched_tps": 315.5, "delta_pct": 12.2 },
+      { "group": "W4A16-sweep", "model": "Gemma-2-9B-W4A16",       "size_b": 9,  "baseline_tps": 213.7, "patched_tps": 236.3, "delta_pct": 10.6 },
+      { "group": "W4A16-sweep", "model": "Mistral-Nemo-12B-W4A16", "size_b": 12, "baseline_tps": 209.8, "patched_tps": 241.7, "delta_pct": 15.2 },
+      { "group": "W4A16-sweep", "model": "phi-4-14B-W4A16",        "size_b": 14, "baseline_tps": 175.8, "patched_tps": 201.5, "delta_pct": 14.6 },
+      { "group": "W4A16-sweep", "model": "Mistral-Small-24B-W4A16","size_b": 24, "baseline_tps": 119.4, "patched_tps": 136.4, "delta_pct": 14.2 },
+      { "group": "W4A16-sweep", "model": "Llama-3.3-70B-W4A16",    "size_b": 70, "baseline_tps": 33.4,  "patched_tps": 40.5,  "delta_pct": 21.3 },
+      { "group": "W4A16-sweep", "model": "Qwen2.5-72B-W4A16",      "size_b": 72, "baseline_tps": 32.9,  "patched_tps": 38.5,  "delta_pct": 17.0 }
+    ]
+  },
+  "correctness": {
+    "validations": [
+      {
+        "name": "lm-eval-harness",
+        "description": "MMLU, HellaSwag, GSM8K on Qwen3-4B-AWQ — baseline vs patched build",
+        "pass": true,
+        "note": "All deltas within stderr bounds and have mixed signs — no measurable behavioral change"
+      }
+    ],
+    "accuracy": {
+      "mmlu":        { "baseline": 0.6740, "optimized": 0.6756, "unit": "acc" },
+      "hellaswag":   { "baseline": 0.5742, "optimized": 0.5722, "unit": "acc_norm" },
+      "gsm8k":       { "baseline": 0.8586, "optimized": 0.8535, "unit": "exact_match" },
+      "cost_per_1m": { "baseline": null,   "optimized": null,   "unit": "$" }
+    }
+  },
+  "callout_note": "Qwen3-4B AWQ · vLLM v0.19.2rc0 · Intel Xeon 8581C Emerald Rapids (TP=2, 96 vCPUs).\nThroughput (+36%) on decode-heavy workload · 128in/2048out · max-concurrency 32.\nAMX dequant kernel + torch.topk sampler · 13-model sweep: +8% to +36%.\nQuality: MMLU 67.40→67.56 · HellaSwag 57.42→57.22 · GSM8K 85.86→85.35 (all within noise) · lm-eval-harness.",
+  "cross_hardware": [
+    {
+      "model": "Qwen3-4B AWQ",
+      "class": "Datacenter CPU",
+      "hardware": "Intel Xeon 8581C Emerald Rapids",
+      "spec_tier": "high",
+      "framework": "vLLM v0.19.2rc0",
+      "optimization": "AMX dequant kernel (int4→bf16 tile fuse) + torch.topk sampler",
+      "throughput_delta_pct": 36.0,
+      "accuracy_delta": 0.0,
+      "verdict": "pass",
+      "config_id": "qwen3-4b-awq__intel-xeon-8581c__vllm"
+    }
+  ]
+}

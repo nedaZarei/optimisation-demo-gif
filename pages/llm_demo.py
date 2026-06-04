@@ -441,7 +441,7 @@ body {
       </div>
       <div class="thr-gauge-wrap">
         <div class="thr-gauge-track"><div class="thr-gauge-fill" id="thr-fill-b"></div></div>
-        <div class="thr-scale-row"><span>0</span><span>30</span><span>60</span><span>90 tok/s</span></div>
+        <div class="thr-scale-row"><span>0</span><span id="thr-s1-b">—</span><span id="thr-s2-b">—</span><span id="thr-smax-b">— tok/s</span></div>
       </div>
       <div class="thr-num-row">
         <span class="thr-big-num" id="thr-num-b">—</span>
@@ -460,7 +460,7 @@ body {
       </div>
       <div class="thr-gauge-wrap">
         <div class="thr-gauge-track"><div class="thr-gauge-fill thr-gauge-fill-opt" id="thr-fill-o"></div></div>
-        <div class="thr-scale-row"><span>0</span><span>30</span><span>60</span><span>90 tok/s</span></div>
+        <div class="thr-scale-row"><span>0</span><span id="thr-s1-o">—</span><span id="thr-s2-o">—</span><span id="thr-smax-o">— tok/s</span></div>
       </div>
       <div class="thr-num-row">
         <span class="thr-big-num thr-big-num-opt" id="thr-num-o">—</span>
@@ -610,6 +610,13 @@ function updatePromptView() {
   if (isThr) {
     var td = ALL[curCfg].throughput_demo;
     document.getElementById('prompt-box').textContent = td ? td.scenario : '';
+    if (td) {
+      var sm = td.scale_max_tps || 90;
+      var t1 = Math.round(sm / 3), t2 = Math.round(2 * sm / 3);
+      ['b','o'].forEach(function(s) {
+        setText('thr-s1-'+s, t1); setText('thr-s2-'+s, t2); setText('thr-smax-'+s, sm+' tok/s');
+      });
+    }
   } else {
     updatePromptBox();
   }
@@ -778,11 +785,14 @@ function finish(bTtft,aTtft,bTps,aTps,bEnd,aEnd) {
       cfg.meta.model+' · '+cfg.meta.framework+' · '+cfg.meta.hardware+'.\n'+
       'Throughput and TTFT measured under concurrent load (32 req, ABBA design) on vLLM bench serve benchmark.\n'+
       'Quality validated via semantic similarity ≥ 0.92 · all-MiniLM-L6-v2 · 50 runs per scenario');
-  } else {
+  } else if (bTtft > 0 && aTtft > 0) {
     var s2 = Math.round((bTtft-aTtft)/bTtft*100);
     setText('m-ttft-pct','−'+s2+'%'); setText('m-ttft-old',bTtft+' ms'); setText('m-ttft-new',aTtft+' ms');
     setText('co-note', ALL[curCfg].callout_note ||
       'Quality validated via semantic similarity ≥ 0.92 · all-MiniLM-L6-v2 · 50 runs per scenario');
+  } else {
+    setText('m-ttft-pct','—'); setText('m-ttft-old','—'); setText('m-ttft-new','—');
+    setText('co-note', ALL[curCfg].callout_note || '');
   }
   document.getElementById('metrics').classList.add('show');
   setTimeout(function(){ document.getElementById('callout').classList.add('show'); }, 180);
