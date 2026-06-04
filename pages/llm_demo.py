@@ -791,7 +791,16 @@ function finish(bTtft,aTtft,bTps,aTps,bEnd,aEnd) {
     setText('co-note', ALL[curCfg].callout_note ||
       'Quality validated via semantic similarity ≥ 0.92 · all-MiniLM-L6-v2 · 50 runs per scenario');
   } else {
-    setText('m-ttft-pct','—'); setText('m-ttft-old','—'); setText('m-ttft-new','—');
+    var td2 = ALL[curCfg].throughput_demo;
+    if (td2 && td2.baseline_tpot_ms && td2.optimized_tpot_ms) {
+      var tpotDelta = Math.round((td2.baseline_tpot_ms - td2.optimized_tpot_ms) / td2.baseline_tpot_ms * 100);
+      document.querySelectorAll('#metrics .mc-lbl')[1].textContent = 'TPOT';
+      setText('m-ttft-pct','−'+tpotDelta+'%');
+      setText('m-ttft-old', td2.baseline_tpot_ms+' ms');
+      setText('m-ttft-new', td2.optimized_tpot_ms+' ms');
+    } else {
+      setText('m-ttft-pct','—'); setText('m-ttft-old','—'); setText('m-ttft-new','—');
+    }
     setText('co-note', ALL[curCfg].callout_note || '');
   }
   document.getElementById('metrics').classList.add('show');
