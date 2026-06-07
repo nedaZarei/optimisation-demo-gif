@@ -125,6 +125,16 @@ body{font-family:var(--font-sans);background:var(--color-bg);padding:2px 2px 16p
 
 /* callout */
 #callout{background:rgba(123,102,255,0.06);border:1px solid rgba(123,102,255,0.18);border-radius:var(--r-lg);padding:14px 20px;font-size:0.75rem;color:var(--color-slate-400);line-height:1.65;text-align:center;}
+/* cross-hardware */
+#cross-hw{margin-top:12px;}
+.xhw-head{font-size:0.68rem;font-weight:800;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-slate-600);margin-bottom:8px;text-align:center;}
+.xhw-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.xhw-card{background:var(--color-card);border:1px solid var(--color-border);border-radius:var(--r-lg);padding:14px 16px;}
+.xhw-hw-name{font-size:0.82rem;font-weight:700;color:var(--color-slate-200);margin-bottom:2px;}
+.xhw-hw-sub{font-size:0.68rem;color:var(--color-slate-500);font-family:var(--font-mono);margin-bottom:10px;}
+.xhw-clip{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-top:1px solid rgba(255,255,255,0.05);}
+.xhw-clip-lbl{font-size:0.72rem;color:var(--color-slate-400);}
+.xhw-clip-val{font-size:1.05rem;font-weight:800;font-family:var(--font-mono);color:var(--color-success);}
 </style>
 </head>
 <body>
@@ -141,7 +151,7 @@ body{font-family:var(--font-sans);background:var(--color-bg);padding:2px 2px 16p
   <select class="sb-sel"><option>whisper-large-v3</option></select>
   <span class="spec-sep">·</span>
   <span class="spec-lbl">Hardware</span>
-  <select class="sb-sel"><option>NVIDIA RTX 3090 (Beast3)</option></select>
+  <select class="sb-sel"><option>NVIDIA RTX 3090</option></select>
 </div>
 
 <div class="scenario-strip">
@@ -218,6 +228,10 @@ body{font-family:var(--font-sans);background:var(--color-bg);padding:2px 2px 16p
   </div>
 
   <div id="callout"></div>
+  <div id="cross-hw" style="display:none">
+    <div class="xhw-head">Cross-hardware · same optimization codebase</div>
+    <div class="xhw-cards" id="xhw-cards"></div>
+  </div>
 </div>
 
 <script>
@@ -406,6 +420,24 @@ function showResults() {
   document.getElementById('callout').innerHTML =
     CFG.callout_note.replace(/\n/g, '<br>');
 
+  // Cross-hardware
+  if (CFG.cross_hardware && CFG.cross_hardware.length) {
+    var xhCards = document.getElementById('xhw-cards');
+    xhCards.innerHTML = '';
+    CFG.cross_hardware.forEach(function(hw) {
+      var h = '<div class="xhw-card">';
+      h += '<div class="xhw-hw-name">' + hw.hardware + '</div>';
+      h += '<div class="xhw-hw-sub">' + hw.compute_type + ' · ' + hw.hardware_class + '</div>';
+      hw.clips.forEach(function(c) {
+        h += '<div class="xhw-clip"><span class="xhw-clip-lbl">' + c.label + '</span>';
+        h += '<span class="xhw-clip-val">−' + c.improvement_pct.toFixed(1) + '%</span></div>';
+      });
+      h += '</div>';
+      xhCards.innerHTML += h;
+    });
+    document.getElementById('cross-hw').style.display = 'block';
+  }
+
   document.getElementById('results-panel').style.display = 'block';
 }
 
@@ -423,6 +455,7 @@ function resetUI() {
     document.getElementById('badge-' + s).textContent = 'Idle';
   });
   document.getElementById('results-panel').style.display = 'none';
+  document.getElementById('cross-hw').style.display = 'none';
   document.getElementById('start-btn').disabled    = false;
   document.getElementById('start-btn').textContent = '▶ Run benchmark';
 }
@@ -457,7 +490,7 @@ def render_asr_demo():
         .replace("__HACK_REGULAR__", hack_r)
         .replace("__HACK_BOLD__",    hack_b)
     )
-    st.components.v1.html(html, height=1060, scrolling=False)
+    st.components.v1.html(html, height=1185, scrolling=False)
 
 
 render_asr_demo()

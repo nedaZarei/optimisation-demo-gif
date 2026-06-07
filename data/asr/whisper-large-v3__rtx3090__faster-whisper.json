@@ -3,7 +3,7 @@
     "config_id": "whisper-large-v3__rtx3090__faster-whisper",
     "model": "whisper-large-v3",
     "framework": "faster-whisper",
-    "hardware": "NVIDIA RTX 3090 (Beast3)",
+    "hardware": "NVIDIA RTX 3090",
     "hardware_class": "Workstation GPU",
     "hardware_specs": {
       "gpu_vram_gb": 24,
@@ -64,7 +64,27 @@
     "sha1_identical": true,
     "transcript_determinism": true
   },
-  "callout_note": "faster-whisper large-v3 · NVIDIA RTX 3090 · Beast3 (int8_float16 · beam=5 · batch=32).\n4-stream concurrent benchmark · long_form_v1 (21-min audio) · Artemis ASR Bench.\nSHA1-identical output · WER delta ≈ 0% · 6/6 noise conditions pass.",
+  "callout_note": "Validated by Artemis ASR Bench · SHA1-identical output · WER delta ≈ 0% · 6/6 noise conditions pass",
+  "cross_hardware": [
+    {
+      "hardware": "NVIDIA RTX 3090",
+      "hardware_class": "Workstation GPU",
+      "compute_type": "int8_float16",
+      "clips": [
+        { "label": "Clean long-form · 5 min",     "baseline_ms": 3038,  "optimized_ms": 2561,  "improvement_pct": 15.7 },
+        { "label": "Telephone-quality · 21 min",  "baseline_ms": 12250, "optimized_ms": 10157, "improvement_pct": 17.1 }
+      ]
+    },
+    {
+      "hardware": "NVIDIA A100-SXM4-80GB",
+      "hardware_class": "Data Center GPU",
+      "compute_type": "bfloat16",
+      "clips": [
+        { "label": "Clean long-form · 5 min",     "baseline_ms": 2676,  "optimized_ms": 2189,  "improvement_pct": 18.2 },
+        { "label": "Telephone-quality · 21 min",  "baseline_ms": 10380, "optimized_ms": 8059,  "improvement_pct": 22.4 }
+      ]
+    }
+  ],
   "concurrent_demo": {
     "num_streams": 4,
     "files_per_stream": 3,
