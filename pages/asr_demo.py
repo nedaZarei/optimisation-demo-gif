@@ -135,6 +135,21 @@ body{font-family:var(--font-sans);background:var(--color-bg);padding:2px 2px 16p
 .xhw-clip{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-top:1px solid rgba(255,255,255,0.05);}
 .xhw-clip-lbl{font-size:0.72rem;color:var(--color-slate-400);}
 .xhw-clip-val{font-size:1.05rem;font-weight:800;font-family:var(--font-mono);color:var(--color-success);}
+
+/* view toggle */
+.view-toggle{display:flex;gap:8px;margin-bottom:12px;}
+.vt-btn{flex:1;padding:9px 12px;background:var(--color-card);border:1px solid var(--color-border);border-radius:var(--r-lg);color:var(--color-slate-400);font-family:var(--font-sans);font-size:0.76rem;font-weight:700;cursor:pointer;transition:all 0.15s;}
+.vt-btn:hover{color:var(--color-slate-200);}
+.vt-btn.vt-active{background:rgba(123,102,255,0.12);border-color:rgba(123,102,255,0.3);color:var(--color-brand-400);}
+.clip-select-wrap{display:flex;align-items:center;gap:6px;margin-bottom:12px;font-size:0.81rem;}
+
+/* transcript race */
+.ttext{font-size:0.78rem;line-height:1.7;color:var(--color-slate-300);height:230px;overflow-y:auto;padding-right:6px;white-space:pre-wrap;}
+.ttext::-webkit-scrollbar{width:4px;}
+.ttext::-webkit-scrollbar-thumb{background:var(--color-slate-700);border-radius:4px;}
+.ttext-placeholder{color:var(--color-slate-600);font-style:italic;}
+.tcol-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.07);}
+.stream-col-opt .tcol-hdr{border-color:rgba(74,222,128,0.1);}
 </style>
 </head>
 <body>
@@ -160,8 +175,19 @@ body{font-family:var(--font-sans);background:var(--color-bg);padding:2px 2px 16p
   <span class="chip">faster-whisper 1.2.1</span>
 </div>
 
+<div class="view-toggle">
+  <button class="vt-btn vt-active" id="vt-concurrent" onclick="setMode('concurrent')">4-stream concurrent</button>
+  <button class="vt-btn" id="vt-transcript" onclick="setMode('transcript')">Live transcription</button>
+</div>
+
+<div class="clip-select-wrap" id="clip-select-wrap" style="display:none">
+  <span class="spec-lbl">Clip</span>
+  <select class="sb-sel" id="clip-sel" onchange="onClipChange(this.value)"></select>
+</div>
+
 <button class="start-btn" id="start-btn" onclick="startRace()">&#9654; Run benchmark</button>
 
+<div id="concurrent-view">
 <div class="race-row">
   <!-- Stock -->
   <div class="stream-col" id="col-b">
@@ -194,9 +220,38 @@ body{font-family:var(--font-sans);background:var(--color-bg);padding:2px 2px 16p
     </div>
   </div>
 </div>
+</div>
+
+<div id="transcript-view" style="display:none">
+<div class="race-row">
+  <!-- Stock -->
+  <div class="stream-col" id="tcol-b">
+    <div class="tcol-hdr">
+      <span class="col-title">Stock</span>
+      <span class="footer-badge badge-idle" id="tbadge-b">Idle</span>
+    </div>
+    <div class="ttext" id="ttext-b"><span class="ttext-placeholder">Awaiting transcription…</span></div>
+    <div class="col-footer">
+      <span class="footer-throughput" id="tfoot-b">—</span>
+    </div>
+  </div>
+  <!-- Optimized -->
+  <div class="stream-col stream-col-opt" id="tcol-o">
+    <div class="tcol-hdr">
+      <span class="col-title">&#9889; Optimized</span>
+      <span class="footer-badge badge-idle" id="tbadge-o">Idle</span>
+    </div>
+    <div class="ttext" id="ttext-o"><span class="ttext-placeholder">Awaiting transcription…</span></div>
+    <div class="col-footer">
+      <span class="footer-throughput" id="tfoot-o">—</span>
+    </div>
+  </div>
+</div>
+</div>
 
 <!-- Results (hidden until done) -->
 <div id="results-panel">
+  <div id="concurrent-results">
   <div class="scale-section">
     <div class="section-label">What this means at scale</div>
     <div class="scale-cards">
@@ -226,6 +281,29 @@ body{font-family:var(--font-sans);background:var(--color-bg);padding:2px 2px 16p
     <div class="transcript-subhead">Sample transcript · Clean long-form · 5 min studio recording</div>
     <div class="transcript-text" id="transcript-text"></div>
   </div>
+  </div>
+
+  <div id="transcript-results" style="display:none">
+    <div class="transcript-badge">&#10003; Same transcript text &nbsp;&middot;&nbsp; WER delta &asymp; 0%</div>
+    <div class="scale-cards" style="grid-template-columns:repeat(2,1fr);margin-top:10px;">
+      <div class="scale-card">
+        <div class="scale-lbl">Latency<br>(single request)</div>
+        <div class="scale-val" id="tr-pct">—</div>
+        <div class="scale-arrow">
+          <span class="old" id="tr-old">—</span><span>→</span><span class="new" id="tr-new">—</span>
+        </div>
+        <div class="scale-sub">ms</div>
+      </div>
+      <div class="scale-card">
+        <div class="scale-lbl">Real-Time Factor</div>
+        <div class="scale-val" id="tr-rtf-pct">—</div>
+        <div class="scale-arrow">
+          <span class="old" id="tr-rtf-old">—</span><span>→</span><span class="new" id="tr-rtf-new">—</span>
+        </div>
+        <div class="scale-sub">lower is faster</div>
+      </div>
+    </div>
+  </div>
 
   <div id="callout"></div>
   <div id="cross-hw" style="display:none">
@@ -239,6 +317,8 @@ var CFG = __CONFIG_JSON__;
 var cd  = CFG.concurrent_demo;
 var ANIM_MS = 9000;
 var running = false, animId = null;
+var curMode = 'concurrent';
+var curClip = 0;
 
 // ── Compute animation params ──────────────────────────────────────────────────
 var rtfB = cd.baseline.rtf_per_stream;   // 0.0096
@@ -258,9 +338,44 @@ var totalAnimB    = ANIM_MS;
 var totalAnimO    = totalRealO * scale;
 
 // ── Scenario chip ─────────────────────────────────────────────────────────────
-document.getElementById('chip-scenario').textContent =
-  nStreams + ' parallel streams · ' + nFiles + ' files each · ' +
-  Math.floor(fileDur/60) + '-min audio';
+function updateScenarioChip() {
+  if (curMode === 'concurrent') {
+    document.getElementById('chip-scenario').textContent =
+      nStreams + ' parallel streams · ' + nFiles + ' files each · ' +
+      Math.floor(fileDur/60) + '-min audio';
+  } else {
+    var clip = CFG.demo_clips[curClip];
+    document.getElementById('chip-scenario').textContent = clip.label + ' · ' + clip.description;
+  }
+}
+updateScenarioChip();
+
+// ── View / clip selection ──────────────────────────────────────────────────────
+function setMode(mode) {
+  if (running) return;
+  curMode = mode;
+  document.getElementById('vt-concurrent').classList.toggle('vt-active', mode === 'concurrent');
+  document.getElementById('vt-transcript').classList.toggle('vt-active', mode === 'transcript');
+  document.getElementById('concurrent-view').style.display = mode === 'concurrent' ? '' : 'none';
+  document.getElementById('transcript-view').style.display = mode === 'transcript' ? '' : 'none';
+  document.getElementById('clip-select-wrap').style.display = mode === 'transcript' ? '' : 'none';
+  updateScenarioChip();
+  resetUI();
+}
+function onClipChange(v) {
+  curClip = parseInt(v);
+  updateScenarioChip();
+  resetUI();
+}
+function initClipSel() {
+  var sel = document.getElementById('clip-sel');
+  sel.innerHTML = '';
+  CFG.demo_clips.forEach(function(c, i) {
+    var o = document.createElement('option');
+    o.value = i; o.textContent = c.label + ' · ' + c.description;
+    sel.appendChild(o);
+  });
+}
 
 // ── Build lane rows ───────────────────────────────────────────────────────────
 function buildLanes(containerId, isOpt) {
@@ -337,6 +452,11 @@ function updateSide(cid, elapsed, perFileAnim, isOpt) {
 
 // ── Race ──────────────────────────────────────────────────────────────────────
 function startRace() {
+  if (running) return;
+  if (curMode === 'transcript') { startTranscriptRace(); return; }
+  startConcurrentRace();
+}
+function startConcurrentRace() {
   if (running) return;
   running = true;
 
@@ -420,7 +540,14 @@ function showResults() {
   document.getElementById('callout').innerHTML =
     CFG.callout_note.replace(/\n/g, '<br>');
 
-  // Cross-hardware
+  renderCrossHw();
+
+  document.getElementById('concurrent-results').style.display = '';
+  document.getElementById('transcript-results').style.display = 'none';
+  document.getElementById('results-panel').style.display = 'block';
+}
+
+function renderCrossHw() {
   if (CFG.cross_hardware && CFG.cross_hardware.length) {
     var xhCards = document.getElementById('xhw-cards');
     xhCards.innerHTML = '';
@@ -437,7 +564,93 @@ function showResults() {
     });
     document.getElementById('cross-hw').style.display = 'block';
   }
+}
 
+// ── Live transcription race ────────────────────────────────────────────────────
+function startTranscriptRace() {
+  if (running) return;
+  running = true;
+  document.getElementById('start-btn').disabled = true;
+  document.getElementById('results-panel').style.display = 'none';
+
+  var clip = CFG.demo_clips[curClip];
+  var bMs = clip.baseline.latency_ms, oMs = clip.optimized.latency_ms;
+  var TARGET = 8000; // ms, visual pacing only
+  var animB = TARGET;
+  var animO = TARGET * (oMs / bMs);
+  var text = clip.transcript;
+
+  ['b','o'].forEach(function(s) {
+    document.getElementById('tbadge-' + s).className = 'footer-badge badge-running';
+    document.getElementById('tbadge-' + s).textContent = 'Transcribing…';
+    document.getElementById('ttext-' + s).textContent = '';
+    document.getElementById('tfoot-' + s).innerHTML = '—';
+  });
+
+  var t0 = performance.now();
+  var bDone = false, oDone = false;
+
+  function tick() {
+    var elapsed = performance.now() - t0;
+
+    if (!bDone) {
+      var fracB = Math.min(elapsed / animB, 1);
+      document.getElementById('ttext-b').textContent = text.slice(0, Math.floor(text.length * fracB));
+      if (fracB >= 1) {
+        bDone = true;
+        document.getElementById('ttext-b').textContent = text;
+        document.getElementById('tbadge-b').className = 'footer-badge badge-done';
+        document.getElementById('tbadge-b').textContent = '✓ Done';
+        document.getElementById('tfoot-b').innerHTML =
+          '<strong>' + bMs.toLocaleString() + ' ms</strong> · RTF ' + clip.baseline.rtf.toFixed(4);
+      }
+    }
+    if (!oDone) {
+      var fracO = Math.min(elapsed / animO, 1);
+      document.getElementById('ttext-o').textContent = text.slice(0, Math.floor(text.length * fracO));
+      if (fracO >= 1) {
+        oDone = true;
+        document.getElementById('ttext-o').textContent = text;
+        document.getElementById('tbadge-o').className = 'footer-badge badge-done';
+        document.getElementById('tbadge-o').textContent = '✓ Done';
+        document.getElementById('tfoot-o').innerHTML =
+          '<strong>' + oMs.toLocaleString() + ' ms</strong> · RTF ' + clip.optimized.rtf.toFixed(4);
+      }
+    }
+
+    if (bDone && oDone) {
+      showTranscriptResults(clip);
+      return;
+    }
+    animId = requestAnimationFrame(tick);
+  }
+  animId = requestAnimationFrame(tick);
+}
+
+function showTranscriptResults(clip) {
+  running = false;
+  document.getElementById('start-btn').disabled    = false;
+  document.getElementById('start-btn').textContent = '↺ Run again';
+
+  var bMs = clip.baseline.latency_ms, oMs = clip.optimized.latency_ms;
+  var pct = Math.round((bMs - oMs) / bMs * 100);
+  document.getElementById('tr-pct').textContent = '−' + pct + '%';
+  document.getElementById('tr-old').textContent = bMs.toLocaleString() + ' ms';
+  document.getElementById('tr-new').textContent = oMs.toLocaleString() + ' ms';
+
+  var rtfB = clip.baseline.rtf, rtfO = clip.optimized.rtf;
+  var rtfPct = Math.round((rtfB - rtfO) / rtfB * 100);
+  document.getElementById('tr-rtf-pct').textContent = '−' + rtfPct + '%';
+  document.getElementById('tr-rtf-old').textContent = rtfB.toFixed(4);
+  document.getElementById('tr-rtf-new').textContent = rtfO.toFixed(4);
+
+  document.getElementById('callout').innerHTML =
+    CFG.callout_note.replace(/\n/g, '<br>');
+
+  renderCrossHw();
+
+  document.getElementById('concurrent-results').style.display = 'none';
+  document.getElementById('transcript-results').style.display = 'block';
   document.getElementById('results-panel').style.display = 'block';
 }
 
@@ -454,8 +667,16 @@ function resetUI() {
     document.getElementById('badge-' + s).className = 'footer-badge badge-idle';
     document.getElementById('badge-' + s).textContent = 'Idle';
   });
+  ['b','o'].forEach(function(s) {
+    document.getElementById('ttext-' + s).innerHTML = '<span class="ttext-placeholder">Awaiting transcription…</span>';
+    document.getElementById('tbadge-' + s).className = 'footer-badge badge-idle';
+    document.getElementById('tbadge-' + s).textContent = 'Idle';
+    document.getElementById('tfoot-' + s).innerHTML = '—';
+  });
   document.getElementById('results-panel').style.display = 'none';
   document.getElementById('cross-hw').style.display = 'none';
+  document.getElementById('concurrent-results').style.display = '';
+  document.getElementById('transcript-results').style.display = 'none';
   document.getElementById('start-btn').disabled    = false;
   document.getElementById('start-btn').textContent = '▶ Run benchmark';
 }
@@ -463,6 +684,7 @@ function resetUI() {
 // ── Init ──────────────────────────────────────────────────────────────────────
 buildLanes('lanes-b', false);
 buildLanes('lanes-o', true);
+initClipSel();
 </script>
 </body></html>"""
 
@@ -490,7 +712,7 @@ def render_asr_demo():
         .replace("__HACK_REGULAR__", hack_r)
         .replace("__HACK_BOLD__",    hack_b)
     )
-    st.components.v1.html(html, height=1185, scrolling=False)
+    st.components.v1.html(html, height=1340, scrolling=False)
 
 
 render_asr_demo()
